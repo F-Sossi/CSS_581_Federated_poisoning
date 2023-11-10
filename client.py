@@ -11,7 +11,6 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
-
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
 # #############################################################################
@@ -41,12 +40,17 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, trainloader, epochs):
+def train(net, trainloader, epochs, is_malicious=False):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
+            # If the client is malicious, flip the labels
+            if is_malicious:
+                labels = torch.randint(0, 10, labels.shape)
+
             optimizer.zero_grad()
             criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
@@ -82,6 +86,7 @@ def load_data():
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
@@ -94,25 +99,18 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        # Check if the client should behave maliciously
-        if os.environ.get("IS_MALICIOUS") == "1":
-            # Malicious behavior: e.g., do not update the model correctly
-            pass
-        else:
-            # Benign behavior
-            train(net, trainloader, epochs=1)
+        print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
+        is_malicious = os.environ.get("IS_MALICIOUS") == "1"
+        train(net, trainloader, epochs=1, is_malicious=is_malicious)
+        print("Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        # Check if the client should behave maliciously
-        if os.environ.get("IS_MALICIOUS") == "1":
-            # Malicious behavior: e.g., report incorrect loss and accuracy
-            loss, accuracy = 100, 0  # Arbitrarily bad metrics
-        else:
-            # Benign behavior
-            loss, accuracy = test(net, testloader)
-        return loss, len(testloader.dataset), {"accuracy": accuracy}
+        loss, accuracy = test(net, testloader)  # Use the actual test function for all clients
+        return float(loss), len(testloader.dataset), {"accuracy": accuracy}
+
+
 
 # Start Flower client
 fl.client.start_numpy_client(

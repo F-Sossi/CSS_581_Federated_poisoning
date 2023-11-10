@@ -4,35 +4,28 @@ import os
 import time
 
 # Parameters
-NUM_TOTAL_CLIENTS = 10
-MAX_MALICIOUS_CLIENTS = 5
-NUM_ROUNDS = 100
+NUM_TOTAL_CLIENTS = 5
+MAX_MALICIOUS_CLIENTS = 2
+NUM_ROUNDS = 5
 RESULTS_DIR = "experiment_results"
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 8872afb (init)
 # Function to start the Flower server
 def start_server(num_rounds, output_file):
     cmd = ["python", "server.py", "--rounds", str(num_rounds), "--output", output_file]
     subprocess.run(cmd)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 8872afb (init)
 # Function to start a Flower client
 def start_client(is_malicious=False):
     env = os.environ.copy()
+    print("Starting client. Malicious:", is_malicious)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
     cmd = ["python", "client.py"]
     subprocess.run(cmd, env=env)
+    print("Client finished.")
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 8872afb (init)
 # Main function to orchestrate the server and clients
 def main():
     for num_malicious in range(MAX_MALICIOUS_CLIENTS + 1):
@@ -60,12 +53,8 @@ def main():
         server_thread.join()
         print(f"Experiment with {num_malicious} malicious clients completed")
 
-<<<<<<< HEAD
 
 if __name__ == "__main__":
     main()
-=======
-if __name__ == "__main__":
-    main()
 
->>>>>>> 8872afb (init)
+
