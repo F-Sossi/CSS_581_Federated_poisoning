@@ -102,7 +102,7 @@ class FlowerClient(fl.client.NumPyClient):
         print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
         train(net, trainloader, epochs=1, is_malicious=is_malicious)
-        print("Finished training.")
+        print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):

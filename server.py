@@ -28,7 +28,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
         aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round, results, failures)
-        print(f"Round {server_round}: Aggregating evaluation results")
+        print(f"\n Round {server_round}: Aggregating evaluation results")
 
         # Add custom logic to aggregate metrics such as accuracy
         if results:

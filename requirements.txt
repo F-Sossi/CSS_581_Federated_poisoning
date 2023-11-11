@@ -1,9 +1,8 @@
 flwr>=1.0, <2.0
-torch==1.13.1
-torchvision==0.14.1
+torch>=1.13.1
+torchvision>=0.14.1
 tqdm==4.65.0
-<<<<<<< HEAD
+
 
 matplotlib~=3.7.3
-=======
->>>>>>> 8872afb (init)
+
