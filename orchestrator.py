@@ -6,7 +6,7 @@ import time
 # Parameters
 NUM_TOTAL_CLIENTS = 20
 MAX_MALICIOUS_CLIENTS = 10
-NUM_ROUNDS = 50
+NUM_ROUNDS = 100
 RESULTS_DIR = "experiment_results"
 
 
@@ -19,11 +19,11 @@ def start_server(num_rounds, output_file):
 # Function to start a Flower client
 def start_client(is_malicious=False):
     env = os.environ.copy()
-    print("Starting client. Malicious:", is_malicious)
+    # print("Starting client. Malicious:", is_malicious)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
     cmd = ["python", "client.py"]
-    subprocess.run(cmd, env=env)
-    print("Client finished.")
+    subprocess.Popen(cmd, env=env)
+    # print("Client finished.")
 
 
 # Main function to orchestrate the server and clients

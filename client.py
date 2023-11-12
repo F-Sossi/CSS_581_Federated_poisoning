@@ -88,32 +88,32 @@ trainloader, testloader = load_data()
 
 
 # Define Flower client
+def set_parameters(parameters):
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
+
+
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
-    def set_parameters(self, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
-
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
-        print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
+        set_parameters(parameters)
+        # print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
         train(net, trainloader, epochs=1, is_malicious=is_malicious)
-        print("\n Finished training.")
+        # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
+        set_parameters(parameters)
         loss, accuracy = test(net, testloader)  # Use the actual test function for all clients
         return float(loss), len(testloader.dataset), {"accuracy": accuracy}
 
 
-
 # Start Flower client
 fl.client.start_numpy_client(
-    server_address="127.0.0.1:8080",
+    server_address="localhost:8080",
     client=FlowerClient(),
 )

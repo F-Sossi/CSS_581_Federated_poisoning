@@ -57,7 +57,7 @@ strategy = CustomFedAvg(
 
 def run_server():
     fl.server.start_server(
-        server_address="0.0.0.0:8080",
+        server_address="localhost:8080",
         config=fl.server.ServerConfig(num_rounds=args.rounds),
         strategy=strategy
     )
