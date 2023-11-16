@@ -4,8 +4,8 @@ import os
 import time
 
 # Parameters
-NUM_TOTAL_CLIENTS = 20
-MAX_MALICIOUS_CLIENTS = 10
+NUM_TOTAL_CLIENTS = 5
+MAX_MALICIOUS_CLIENTS = 2
 NUM_ROUNDS = 100
 RESULTS_DIR = "experiment_results"
 

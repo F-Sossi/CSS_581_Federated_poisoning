@@ -1,9 +1,10 @@
 from typing import List, Tuple, Optional, Dict
 import flwr as fl
-from flwr.common import Metrics, Scalar, EvaluateRes, FitRes
+from flwr.common import Parameters, Metrics, Scalar, EvaluateRes, FitRes
 import argparse
 import json
 import threading
+import torch  # Import PyTorch
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
