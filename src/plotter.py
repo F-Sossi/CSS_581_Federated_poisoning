@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-RESULTS_DIR = "experiment_results"
+RESULTS_DIR = "../experiment_results"
 
 
 def load_results():
