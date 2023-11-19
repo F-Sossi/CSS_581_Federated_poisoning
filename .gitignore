@@ -3,3 +3,6 @@ data/*
 
 # Ignore fakeData folder
 fakeData/*
+
+# Ignore .idea folder
+.idea/*
