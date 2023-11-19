@@ -7,7 +7,7 @@ import time
 NUM_TOTAL_CLIENTS = 5
 MAX_MALICIOUS_CLIENTS = 2
 NUM_ROUNDS = 100
-RESULTS_DIR = "experiment_results"
+RESULTS_DIR = "../experiment_results"
 
 
 # Function to start the Flower server
