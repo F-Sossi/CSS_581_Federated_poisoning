@@ -1,16 +1,7 @@
 
-
-```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
-```
-
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. 
+Project dependencies (such as `torch` and `flwr`) are defined in `requirements.txt`. 
 #### Pycharm
 
 ```shell
