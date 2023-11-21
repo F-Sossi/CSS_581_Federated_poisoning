@@ -6,3 +6,9 @@ fakeData/*
 
 # Ignore .idea folder
 .idea/*
+
+# Ignore log_metrics
+log_metrics/*
+
+#ignore weights
+weights/*

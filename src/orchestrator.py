@@ -6,10 +6,12 @@ import time
 
 print('Running Orchestrator (testJGN)')
 # Parameters
-NUM_TOTAL_CLIENTS = 2
-MAX_MALICIOUS_CLIENTS = 1
-NUM_ROUNDS = 1
-RESULTS_DIR = "../experiment_results2"
+
+NUM_TOTAL_CLIENTS = 10
+MAX_MALICIOUS_CLIENTS = 2
+NUM_ROUNDS = 5
+RESULTS_DIR = "../experiment_results"
+
 
 """
 random_flip
@@ -55,7 +57,7 @@ def main():
         output_file = os.path.join(RESULTS_DIR, f"{attack}results_{num_malicious}_malicious.json")
         server_thread = threading.Thread(target=start_server, args=(NUM_ROUNDS, output_file, attack))
         server_thread.start()
-        time.sleep(5)  # Wait for the server to initialize
+        time.sleep(10)  # Wait for the server to initialize
 
         # Start clients
         client_threads = []
