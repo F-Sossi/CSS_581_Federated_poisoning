@@ -67,7 +67,7 @@ def main():
                 attack_type = 'none'
             else:
                 attack_type = attack
-            print('creating client', 'malicious:',is_malicious, ', attack_type:', attack_type)
+            print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
             client_thread = threading.Thread(target=start_client, args=(is_malicious,attack_type,client_id,round_number,))
             client_threads.append(client_thread)
             client_thread.start()
