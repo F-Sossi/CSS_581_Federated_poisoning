@@ -49,27 +49,45 @@ run orchestrator.py
 │   │   └── test_batch
 │   └── cifar-10-python.tar.gz
 ├── experiment_results
-│   ├── results_0_malicious.json
-│   ├── results_10_malicious.json
-│   ├── results_1_malicious.json
-│   ├── results_2_malicious.json
-│   ├── results_3_malicious.json
-│   ├── results_4_malicious.json
-│   ├── results_5_malicious.json
-│   ├── results_6_malicious.json
-│   ├── results_7_malicious.json
-│   ├── results_8_malicious.json
-│   └── results_9_malicious.json
-├── pyproject.toml
+├── fakeData
+│   ├── fake_samples_epoch_014.png
+│   └── real_samples.png
+├── log_metrics
+│   ├── targetedT1T2Round0_ID0_.csv
+│   ├── targetedT1T2Round0_ID1_.csv
+│   ├── targetedT1T2Round0_ID2_.csv
+│   ├── targetedT1T2Round0_ID3_.csv
+│   ├── targetedT1T2Round0_ID4_.csv
+│   ├── targetedT1T2Round1_ID0_.csv
+│   ├── targetedT1T2Round1_ID1_.csv
+│   ├── targetedT1T2Round1_ID2_.csv
+│   ├── targetedT1T2Round1_ID3_.csv
+│   ├── targetedT1T2Round1_ID4_.csv
+│   ├── targetedT1T2Round2_ID0_.csv
+│   ├── targetedT1T2Round2_ID1_.csv
+│   ├── targetedT1T2Round2_ID2_.csv
+│   ├── targetedT1T2Round2_ID3_.csv
+│   └── targetedT1T2Round2_ID4_.csv
 ├── README.md
 ├── requirements.txt
-├── run.sh
-└── src
-    ├── client.py
-    ├── orchestrator.py
-    ├── plotter.py
-    └── server.py
+├── src
+│   ├── client.py
+│   ├── gan2.py
+│   ├── gan.py
+│   ├── orchestrator.py
+│   ├── plotter.py
+│   └── server.py
+├── src\log_metrics\random_flipRound0_ID0_.csv
+├── src\log_metrics\random_flipRound0_ID1_.csv
+├── src\log_metrics\random_flipRound0_ID2_.csv
+├── src\log_metrics\random_flipRound0_ID3_.csv
+├── src\log_metrics\random_flipRound0_ID4_.csv
+├── src\log_metrics\random_flipRound0_ID5_.csv
+├── src\log_metrics\random_flipRound0_ID6_.csv
+├── src\log_metrics\random_flipRound0_ID7_.csv
+├── src\log_metrics\random_flipRound0_ID8_.csv
+├── src\log_metrics\random_flipRound0_ID9_.csv
+└── weights
 
-5 directories, 28 files
 ```
 
