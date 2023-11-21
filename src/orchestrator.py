@@ -9,7 +9,7 @@ print('Running Orchestrator (testJGN)')
 NUM_TOTAL_CLIENTS = 5
 MAX_MALICIOUS_CLIENTS = 2
 NUM_ROUNDS = 5
-RESULTS_DIR = "../experiment_results2"
+RESULTS_DIR = "../experiment_results"
 
 """
 random_flip
