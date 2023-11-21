@@ -63,8 +63,9 @@ def constant_label_flip(labels, offset):
     labels[labels < 0] += max_label+1
     return labels
 
-def targeted_label_flip(original, target):
-    pass
+def targeted_label_flip(labels, original, target):
+    labels[labels==original]=target
+    return labels
 
 
 def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
@@ -89,7 +90,7 @@ def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
                     target_class=int(split[1])
                     new_label=int(split[2])
                     #print(target_class, new_label)
-                    labels=targeted_label_flip(target_class, new_label)
+                    labels=targeted_label_flip(labels, target_class, new_label)
 
                 elif 'random_flip' in attack_type:
                     #print('random flip')
