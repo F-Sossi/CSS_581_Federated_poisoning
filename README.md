@@ -1,4 +1,18 @@
 
+### Running the Project
+```angular2html
+# from src/ directory
+python orchestrator.py attack_type
+
+# attacks types:
+# constant_flip
+# random_flip
+# targeted_flip
+
+# example:
+python orchestrator.py constant_flip
+```
+
 ### Installing Dependencies
 
 Project dependencies (such as `torch` and `flwr`) are defined in `requirements.txt`. 
