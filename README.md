@@ -101,7 +101,6 @@ python orchestrator.py targeted_T8T4
 ├── requirements.txt
 ├── src
 │   ├── client.py
-│   ├── gan2.py
 │   ├── gan.py
 │   ├── orchestrator.py
 │   ├── plotter.py

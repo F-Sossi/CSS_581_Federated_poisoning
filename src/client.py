@@ -78,7 +78,7 @@ def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
 
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
-            # If the client is malicious, flip the labels
+            # If the client is malicious, run the specified attack
             if is_malicious:
 
                 if 'constant_flip' in attack_type:
@@ -193,7 +193,7 @@ class FlowerClient(fl.client.NumPyClient):
         df['y_pred'] = y_pred
         df['y_true'] = y_true
 
-        outputfilename = cwd + '\\log_metrics\\'
+        outputfilename = cwd + '..\\log_metrics\\'
         outputfilename += attack_type
         outputfilename += 'Round' + str(round_number) + '_'
         outputfilename += 'ID' + str(client_number) + '_'

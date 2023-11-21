@@ -252,6 +252,14 @@ for epoch in range(num_epochs):
             fake = netG(fixed_noise)
             vutils.save_image(fake.detach(), '../fakeData/fake_samples_epoch_%03d.png' % epoch, normalize=True)
 
+        # Condition to save the poisoned data
+        if epoch == num_epochs - 1:
+            with torch.no_grad():
+                # Generate a batch of poisoned data
+                poisoned_data = netG(fixed_noise).detach()
+                # Save the poisoned data in a tensor format compatible with CIFAR-10
+                torch.save(poisoned_data, '../fakeData/poisoned_data_epoch_%03d.pt' % epoch)
+
 # Save your models at the end
 torch.save(netG.state_dict(), '../weights/netG.pth')
 torch.save(netD.state_dict(), '../weights/netD.pth')
