@@ -48,6 +48,8 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 parser = argparse.ArgumentParser(description="Flower server with custom strategy")
 parser.add_argument("--rounds", type=int, default=3, help="Number of federated learning rounds")
 parser.add_argument("--output", type=str, default="results.json", help="Output file for results")
+parser.add_argument("--attack", type=str, default="random_flip", help="Output file for results")
+
 args = parser.parse_args()
 
 # Define strategy with custom class
@@ -58,7 +60,7 @@ strategy = CustomFedAvg(
 
 def run_server():
     fl.server.start_server(
-        server_address="localhost:8080",
+        server_address="localhost:8081",
         config=fl.server.ServerConfig(num_rounds=args.rounds),
         strategy=strategy
     )
@@ -70,5 +72,5 @@ server_thread.start()
 server_thread.join()  # Wait for the server thread to finish
 
 # Save results to a file after the server has finished
-with open(args.output, "w") as f:
+with open(args.output, "w+") as f:
     json.dump(strategy.metrics_log, f)
