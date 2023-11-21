@@ -1,4 +1,4 @@
-#from __future__ import print_function
+# from __future__ import print_function
 import os
 import random
 import torch
@@ -15,48 +15,23 @@ print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
 
-# Use CUDA for optimized computations if available
-cudnn.benchmark = True
+cudnn.benchmark = True  # Use CUDA for optimized computations if available
+data_path = "../data"  # Root directory for dataset
+workers = 2  # Number of workers for dataloader
+batch_size = 64  # Batch size during training
+image_size = 64  # Spatial size of training images. All images will be resized to this size using a transformer.
+nc = 3  # Number of channels in the training images
+nz = 100  # Size of z latent vector (i.e., size of generator input)
+ngf = 64  # Size of feature maps in generator
+ndf = 64  # Size of feature maps in discriminator
+num_epochs = 5  # Number of training epochs
+lr = 0.0002  # Learning rate for optimizers
+beta1 = 0.5  # Beta1 hyperparam for Adam optimizers
+ngpu = 1  # Number of GPUs available. Use 0 for CPU mode.
 
-# Root directory for dataset
-dataroot = "../data"
 
-# Number of workers for dataloader
-workers = 2
-
-# Batch size during training
-batch_size = 64
-
-# Spatial size of training images. All images will be resized to this size using a transformer.
-image_size = 64
-
-# Number of channels in the training images
-nc = 3
-
-# Size of z latent vector (i.e., size of generator input)
-nz = 100
-
-# Size of feature maps in generator
-ngf = 64
-
-# Size of feature maps in discriminator
-ndf = 64
-
-# Number of training epochs
-num_epochs = 5
-
-# Learning rate for optimizers
-lr = 0.0002
-
-# Beta1 hyperparam for Adam optimizers
-beta1 = 0.5
-
-# Number of GPUs available. Use 0 for CPU mode.
-ngpu = 1
-
-# We can use an image folder dataset the way we have it setup.
 # Create the dataset
-dataset = datasets.CIFAR10(root=dataroot, download=True, transform=transforms.Compose([
+dataset = datasets.CIFAR10(root=data_path, download=True, transform=transforms.Compose([
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
     transforms.ToTensor(),

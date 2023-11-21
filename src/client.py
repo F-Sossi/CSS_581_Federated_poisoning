@@ -25,6 +25,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
@@ -50,6 +51,7 @@ def random_label_flip(labels):
     labels = torch.randint(0, 10, labels.shape)
     return labels
 
+
 def constant_label_flip(labels, offset):
     unique_values = torch.unique(labels)
     # print(unique_values)
@@ -60,11 +62,12 @@ def constant_label_flip(labels, offset):
 
     for i in range(0, num_unique):
         labels[labels == i] = i - offset
-    labels[labels < 0] += max_label+1
+    labels[labels < 0] += max_label + 1
     return labels
 
+
 def targeted_label_flip(labels, original, target):
-    labels[labels==original]=target
+    labels[labels == original] = target
     return labels
 
 
@@ -79,28 +82,27 @@ def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
             if is_malicious:
 
                 if 'constant_flip' in attack_type:
-                    #print('constant flip')
-                    offset=int(attack_type.split('_'[2]))
-                    labels=constant_label_flip(labels, offset)
-
+                    # print('constant flip')
+                    offset = int(attack_type.split('_'[2]))
+                    labels = constant_label_flip(labels, offset)
 
                 elif 'targeted_flip' in attack_type:
-                    #print('targeted flip')
+                    # print('targeted flip')
                     split = attack_type.split('T')
-                    target_class=int(split[1])
-                    new_label=int(split[2])
-                    #print(target_class, new_label)
-                    labels=targeted_label_flip(labels, target_class, new_label)
+                    target_class = int(split[1])
+                    new_label = int(split[2])
+                    # print(target_class, new_label)
+                    labels = targeted_label_flip(labels, target_class, new_label)
 
                 elif 'random_flip' in attack_type:
-                    #print('random flip')
+                    # print('random flip')
                     labels = random_label_flip(labels)
                 else:
-                    #no attack_type
-                    #print('no attack type:', attack_type)
+                    # no attack_type
+                    # print('no attack type:', attack_type)
                     pass
-                #print('modified labels')
-                #print(labels)
+                # print('modified labels')
+                # print(labels)
 
             optimizer.zero_grad()
             criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
@@ -111,33 +113,31 @@ def test(net, testloader):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
-    y_true=[]
-    y_pred=[]
-    #Hard coded the classes here for cifar10 dataset
-    classes=list(range(0,10))
+    y_true = []
+    y_pred = []
+    # Hard coded the classes here for cifar10 dataset
+    classes = list(range(0, 10))
     with torch.no_grad():
         for images, labels in tqdm(testloader):
-
             outputs = net(images.to(DEVICE))
-            pred=int(torch.argmax(outputs))
-            #print('outputs',pred)
+            pred = int(torch.argmax(outputs))
+            # print('outputs',pred)
             y_pred.append(pred)
 
             labels = labels.to(DEVICE)
-            #print('labels', int(labels))
+            # print('labels', int(labels))
             y_true.append(int(labels))
 
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    extra_displays=False
+    extra_displays = False
     if extra_displays:
         cf_matrix = confusion_matrix(y_true, y_pred)
         df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
                              columns=[i for i in classes])
         plt.figure(figsize=(12, 7))
         sns.heatmap(df_cm, annot=True)
-        plt.savefig('output'+str(time.time())+'.png')
-
+        plt.savefig('output' + str(time.time()) + '.png')
 
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy, y_pred, y_true
@@ -175,33 +175,30 @@ class FlowerClient(fl.client.NumPyClient):
         set_parameters(parameters)
         # print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
-        attack_type=os.environ.get("ATTACK")
+        attack_type = os.environ.get("ATTACK")
         train(net, trainloader, epochs=1, is_malicious=is_malicious, attack_type=attack_type)
         # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def log_metrics(self, y_pred, y_true):
-
         print('logging metrics')
-        cwd=os.getcwd()
-        cwd=cwd.replace('\\src','')
-        print('cwd',cwd)
-        round_number=os.environ.get("ROUND")
-        client_number=os.environ.get("CLIENT_ID")
-        attack_type=os.environ.get("ATTACK")
+        cwd = os.getcwd()
+        cwd = cwd.replace('\\src', '')
+        print('cwd', cwd)
+        round_number = os.environ.get("ROUND")
+        client_number = os.environ.get("CLIENT_ID")
+        attack_type = os.environ.get("ATTACK")
 
+        df = pd.DataFrame(columns=['y_pred', 'y_true'])
+        df['y_pred'] = y_pred
+        df['y_true'] = y_true
 
-        df=pd.DataFrame(columns=['y_pred','y_true'])
-        df['y_pred']=y_pred
-        df['y_true']=y_true
-
-        outputfilename=cwd+'\\log_metrics\\'
+        outputfilename = cwd + '\\log_metrics\\'
         outputfilename += attack_type
-        outputfilename+='Round'+str(round_number)+'_'
+        outputfilename += 'Round' + str(round_number) + '_'
         outputfilename += 'ID' + str(client_number) + '_'
-        outputfilename+='.csv'
+        outputfilename += '.csv'
         df.to_csv(outputfilename)
-
 
     def evaluate(self, parameters, config):
         set_parameters(parameters)
