@@ -7,18 +7,16 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 3
+NUM_TOTAL_CLIENTS = 5
 MAX_MALICIOUS_CLIENTS = 2
-NUM_ROUNDS = 2
+NUM_ROUNDS = 10
 RESULTS_DIR = "../experiment_results"
-
 
 """
 random_flip
 constant_flip_X # substitute X with the offset (if 0 or 10 labels will be unchanged)
 targeted_TXTY  # substitute X with the label to be changed, Y the label it is changed to
 """
-#ATTACK='targeted_T1T2'
 
 
 # Function to start the Flower server
@@ -28,13 +26,13 @@ def start_server(num_rounds, output_file, attack):
 
 
 # Function to start a Flower client
-def start_client(is_malicious=False, attack='none', client_id=0, round_number=0, num_malicious=0):
+def start_client(is_malicious=False, attack='none', client_id=0, round_number=0):
     env = os.environ.copy()
     # print("Starting client. Malicious:", is_malicious)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
     env["ATTACK"] = str(attack)
     env["CLIENT_ID"] = str(client_id)
-    env["NUM_MALICIOUS"] = str()
+    env["ROUND"] = str(round_number)
     cmd = ["python", "client.py"]
     subprocess.Popen(cmd, env=env)
     # print("Client finished.")
@@ -49,8 +47,8 @@ def main():
     print('orchestrator main, attack type:', attack)
 
     for num_malicious in range(MAX_MALICIOUS_CLIENTS + 1):
-    # For testing
-    #for num_malicious in range(1,2):
+        # For testing
+        # for num_malicious in range(1,2):
         print(f"Running experiment with {num_malicious} malicious clients, attack type:", attack)
 
         # Start the server in a separate thread
@@ -63,14 +61,15 @@ def main():
         client_threads = []
         for i in range(NUM_TOTAL_CLIENTS):
             client_id = i
+            round_number = num_malicious
             is_malicious = i < num_malicious
             if not is_malicious:
                 attack_type = 'none'
             else:
                 attack_type = attack
             print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
-            client_thread = threading.Thread(target=start_client, args=(
-                is_malicious, attack_type, client_id, num_malicious,))
+            client_thread = threading.Thread(target=start_client,
+                                             args=(is_malicious, attack_type, client_id, round_number,))
             client_threads.append(client_thread)
             client_thread.start()
 
@@ -85,5 +84,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
