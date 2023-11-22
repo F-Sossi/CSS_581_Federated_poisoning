@@ -202,6 +202,7 @@ class FlowerClient(fl.client.NumPyClient):
         # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
+
     def log_metrics(self, y_pred, y_true):
         print('logging metrics')
         cwd = os.getcwd()
@@ -215,11 +216,9 @@ class FlowerClient(fl.client.NumPyClient):
         df['y_pred'] = y_pred
         df['y_true'] = y_true
 
-        outputfilename = cwd + '..\\log_metrics\\'
-        outputfilename += attack_type
-        outputfilename += 'Round' + str(round_number) + '_'
-        outputfilename += 'ID' + str(client_number) + '_'
-        outputfilename += '.csv'
+        # Construct the output filename
+        filename = f'{attack_type}Round{round_number}_ID{client_number}_.csv'
+        outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
         df.to_csv(outputfilename)
 
     def evaluate(self, parameters, config):
