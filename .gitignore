@@ -2,7 +2,7 @@
 data/*
 
 # Ignore fakeData folder
-fakeData/*
+# fakeData/*
 
 # Ignore .idea folder
 .idea/*
