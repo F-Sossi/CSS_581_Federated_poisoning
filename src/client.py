@@ -71,13 +71,18 @@ def targeted_label_flip(labels, original, target):
     return labels
 
 
-def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
+def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack_type='none'):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
+    if attack_type == 'gan_attack':
+        dataloader = poisoned_dataset
+    else:
+        dataloader = trainloader
+
     for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
+        for images, labels in tqdm(dataloader):
             # If the client is malicious, run the specified attack
             if is_malicious:
 
@@ -144,11 +149,28 @@ def test(net, testloader):
 
 
 def load_data():
+    # load poisoned data
+    poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
+    # Resize the poisoned data to match the CIFAR-10 data
+    poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
+    # add random labels to the poisoned data 1-10
+    poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
+    # combine the poisoned data and labels
+    poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
+
+
+
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     trainset = CIFAR10("../data", train=True, download=True, transform=trf)
     testset = CIFAR10("../data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+
+        # Print the shapes of the datasets and a few samples
+    print('Poisoned data shape:', poisoned_data_resized.shape)
+    print('CIFAR-10 trainset shape:', len(trainset), 'x', trainset[0][0].shape)
+    print('CIFAR-10 testset shape:', len(testset), 'x', testset[0][0].shape)
+
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset), DataLoader(poisoned_dataset)
 
 
 # #############################################################################
@@ -157,7 +179,7 @@ def load_data():
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data()
+trainloader, testloader, poisoned_dataset = load_data()
 
 
 # Define Flower client
@@ -176,7 +198,7 @@ class FlowerClient(fl.client.NumPyClient):
         # print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
         attack_type = os.environ.get("ATTACK")
-        train(net, trainloader, epochs=1, is_malicious=is_malicious, attack_type=attack_type)
+        train(net, trainloader, poisoned_dataset, epochs=1, is_malicious=is_malicious, attack_type=attack_type)
         # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
