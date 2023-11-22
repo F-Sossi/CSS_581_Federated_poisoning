@@ -221,6 +221,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.round_number+=1
         client_number = os.environ.get("CLIENT_ID")
         attack_type = os.environ.get("ATTACK")
+        num_mal= os.environ.get("NUM_MAL")
 
         df = pd.DataFrame(columns=['y_pred', 'y_true'])
         df['y_pred'] = y_pred
