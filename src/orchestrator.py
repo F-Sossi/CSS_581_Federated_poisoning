@@ -7,9 +7,9 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 5
-MAX_MALICIOUS_CLIENTS = 2
-NUM_ROUNDS = 10
+NUM_TOTAL_CLIENTS = 2
+MAX_MALICIOUS_CLIENTS = 1
+NUM_ROUNDS = 2
 RESULTS_DIR = "../experiment_results"
 
 """
@@ -44,6 +44,7 @@ def main():
         attack = sys.argv[1]
     else:
         attack = 'random_flip'
+        print('default attack type chosen:', attack)
     print('orchestrator main, attack type:', attack)
 
     for num_malicious in range(MAX_MALICIOUS_CLIENTS + 1):
@@ -63,10 +64,7 @@ def main():
             client_id = i
             round_number = num_malicious
             is_malicious = i < num_malicious
-            if not is_malicious:
-                attack_type = 'none'
-            else:
-                attack_type = attack
+            attack_type = attack
             print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
             client_thread = threading.Thread(target=start_client,
                                              args=(is_malicious, attack_type, client_id, round_number,))

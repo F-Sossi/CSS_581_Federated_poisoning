@@ -91,7 +91,7 @@ def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack
                     offset = int(attack_type.split('_'[2]))
                     labels = constant_label_flip(labels, offset)
 
-                elif 'targeted_flip' in attack_type:
+                elif 'targeted' in attack_type:
                     # print('targeted flip')
                     split = attack_type.split('T')
                     target_class = int(split[1])
@@ -104,7 +104,7 @@ def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack
                     labels = random_label_flip(labels)
                 else:
                     # no attack_type
-                    # print('no attack type:', attack_type)
+                    print('no attack type:', attack_type)
                     pass
                 # print('modified labels')
                 # print(labels)
@@ -148,16 +148,20 @@ def test(net, testloader):
     return loss, accuracy, y_pred, y_true
 
 
-def load_data():
+def load_data(poisoned=False):
     # load poisoned data
-    poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
-    # Resize the poisoned data to match the CIFAR-10 data
-    poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
-    # add random labels to the poisoned data 1-10
-    poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
-    # combine the poisoned data and labels
-    poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
-
+    if poisoned:
+        poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
+        # Resize the poisoned data to match the CIFAR-10 data
+        poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
+        # add random labels to the poisoned data 1-10
+        poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
+        # combine the poisoned data and labels
+        poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
+        DataLoaderPoisoned=DataLoader(poisoned_dataset)
+        print('Poisoned data shape:', poisoned_data_resized.shape)
+    else:
+        DataLoaderPoisoned=None
 
 
     """Load CIFAR-10 (training and test set)."""
@@ -166,11 +170,12 @@ def load_data():
     testset = CIFAR10("../data", train=False, download=True, transform=trf)
 
         # Print the shapes of the datasets and a few samples
-    print('Poisoned data shape:', poisoned_data_resized.shape)
     print('CIFAR-10 trainset shape:', len(trainset), 'x', trainset[0][0].shape)
     print('CIFAR-10 testset shape:', len(testset), 'x', testset[0][0].shape)
 
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset), DataLoader(poisoned_dataset)
+    DataLoaderTrain=DataLoader(trainset, batch_size=32, shuffle=True)
+    DataLoaderTest=DataLoader(testset)
+    return DataLoaderTrain, DataLoaderTest, DataLoaderPoisoned
 
 
 # #############################################################################
@@ -179,6 +184,7 @@ def load_data():
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
+
 trainloader, testloader, poisoned_dataset = load_data()
 
 
@@ -190,6 +196,9 @@ def set_parameters(parameters):
 
 
 class FlowerClient(fl.client.NumPyClient):
+
+    def __init__(self) -> None:
+        self.round_number=0
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -208,7 +217,8 @@ class FlowerClient(fl.client.NumPyClient):
         cwd = os.getcwd()
         cwd = cwd.replace('\\src', '')
         print('cwd', cwd)
-        round_number = os.environ.get("ROUND")
+        round_number = self.round_number
+        self.round_number+=1
         client_number = os.environ.get("CLIENT_ID")
         attack_type = os.environ.get("ATTACK")
 
@@ -219,6 +229,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Construct the output filename
         filename = f'{attack_type}Round{round_number}_ID{client_number}_.csv'
         outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
+        outputfilename=cwd+'\\log_metrics\\'+filename
         df.to_csv(outputfilename)
 
     def evaluate(self, parameters, config):
