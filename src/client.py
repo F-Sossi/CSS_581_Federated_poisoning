@@ -212,23 +212,33 @@ class FlowerClient(fl.client.NumPyClient):
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
 
+    """
+    This function should create CSV files with y_pred/Y_True
+    for Each round of testing.
+    Number of files created shouldbe num_clients x n_rounds x (max_malicious_clients +1)
+    """
     def log_metrics(self, y_pred, y_true):
         print('logging metrics')
         cwd = os.getcwd()
         cwd = cwd.replace('\\src', '')
         print('cwd', cwd)
         round_number = self.round_number
-        self.round_number+=1
+        self.round_number += 1
         client_number = os.environ.get("CLIENT_ID")
         attack_type = os.environ.get("ATTACK")
-        num_mal= os.environ.get("NUM_MAL")
+        num_mal = os.environ.get("NUM_MAL")
+        is_mal = os.environ.get("IS_MALICIOUS")
+        # B for benign, or M for malicious
+        designation='B'
+        if is_mal == '1':
+            designation='M'
 
         df = pd.DataFrame(columns=['y_pred', 'y_true'])
         df['y_pred'] = y_pred
         df['y_true'] = y_true
 
         # Construct the output filename
-        filename = f'{attack_type}Round{round_number}_ID{client_number}_.csv'
+        filename = f'{designation}{num_mal}{attack_type}Round{round_number}_ID{client_number}_.csv'
         outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
         outputfilename=cwd+'\\log_metrics\\'+filename
         df.to_csv(outputfilename)

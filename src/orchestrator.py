@@ -7,9 +7,9 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 2
-MAX_MALICIOUS_CLIENTS = 1
-NUM_ROUNDS = 2
+NUM_TOTAL_CLIENTS = 3
+MAX_MALICIOUS_CLIENTS = 2
+NUM_ROUNDS = 3
 RESULTS_DIR = "../experiment_results"
 
 """
@@ -32,7 +32,7 @@ def start_client(is_malicious=False, attack='none', client_id=0, round_number=0)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
     env["ATTACK"] = str(attack)
     env["CLIENT_ID"] = str(client_id)
-    env["ROUND"] = str(round_number)
+    env["NUM_MAL"] = str(round_number)
     cmd = ["python", "client.py"]
     subprocess.Popen(cmd, env=env)
     # print("Client finished.")
@@ -62,12 +62,11 @@ def main():
         client_threads = []
         for i in range(NUM_TOTAL_CLIENTS):
             client_id = i
-            round_number = num_malicious
             is_malicious = i < num_malicious
             attack_type = attack
             print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
             client_thread = threading.Thread(target=start_client,
-                                             args=(is_malicious, attack_type, client_id, round_number,))
+                                             args=(is_malicious, attack_type, client_id, num_malicious,))
             client_threads.append(client_thread)
             client_thread.start()
 
