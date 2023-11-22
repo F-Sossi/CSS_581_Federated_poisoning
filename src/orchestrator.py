@@ -7,18 +7,16 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 10
+NUM_TOTAL_CLIENTS = 5
 MAX_MALICIOUS_CLIENTS = 2
-NUM_ROUNDS = 5
+NUM_ROUNDS = 10
 RESULTS_DIR = "../experiment_results"
-
 
 """
 random_flip
 constant_flip_X # substitute X with the offset (if 0 or 10 labels will be unchanged)
 targeted_TXTY  # substitute X with the label to be changed, Y the label it is changed to
 """
-#ATTACK='targeted_T1T2'
 
 
 # Function to start the Flower server
@@ -49,8 +47,8 @@ def main():
     print('orchestrator main, attack type:', attack)
 
     for num_malicious in range(MAX_MALICIOUS_CLIENTS + 1):
-    # For testing
-    #for num_malicious in range(1,2):
+        # For testing
+        # for num_malicious in range(1,2):
         print(f"Running experiment with {num_malicious} malicious clients, attack type:", attack)
 
         # Start the server in a separate thread
@@ -70,7 +68,8 @@ def main():
             else:
                 attack_type = attack
             print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
-            client_thread = threading.Thread(target=start_client, args=(is_malicious,attack_type,client_id,round_number,))
+            client_thread = threading.Thread(target=start_client,
+                                             args=(is_malicious, attack_type, client_id, round_number,))
             client_threads.append(client_thread)
             client_thread.start()
 
@@ -85,5 +84,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

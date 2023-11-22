@@ -25,6 +25,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
@@ -50,6 +51,7 @@ def random_label_flip(labels):
     labels = torch.randint(0, 10, labels.shape)
     return labels
 
+
 def constant_label_flip(labels, offset):
     unique_values = torch.unique(labels)
     # print(unique_values)
@@ -60,47 +62,52 @@ def constant_label_flip(labels, offset):
 
     for i in range(0, num_unique):
         labels[labels == i] = i - offset
-    labels[labels < 0] += max_label+1
+    labels[labels < 0] += max_label + 1
     return labels
+
 
 def targeted_label_flip(labels, original, target):
-    labels[labels==original]=target
+    labels[labels == original] = target
     return labels
 
 
-def train(net, trainloader, epochs, is_malicious=False, attack_type='none'):
+def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack_type='none'):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
+    if attack_type == 'gan_attack':
+        dataloader = poisoned_dataset
+    else:
+        dataloader = trainloader
+
     for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
-            # If the client is malicious, flip the labels
+        for images, labels in tqdm(dataloader):
+            # If the client is malicious, run the specified attack
             if is_malicious:
 
                 if 'constant_flip' in attack_type:
-                    #print('constant flip')
-                    offset=int(attack_type.split('_'[2]))
-                    labels=constant_label_flip(labels, offset)
-
+                    # print('constant flip')
+                    offset = int(attack_type.split('_'[2]))
+                    labels = constant_label_flip(labels, offset)
 
                 elif 'targeted_flip' in attack_type:
-                    #print('targeted flip')
+                    # print('targeted flip')
                     split = attack_type.split('T')
-                    target_class=int(split[1])
-                    new_label=int(split[2])
-                    #print(target_class, new_label)
-                    labels=targeted_label_flip(labels, target_class, new_label)
+                    target_class = int(split[1])
+                    new_label = int(split[2])
+                    # print(target_class, new_label)
+                    labels = targeted_label_flip(labels, target_class, new_label)
 
                 elif 'random_flip' in attack_type:
-                    #print('random flip')
+                    # print('random flip')
                     labels = random_label_flip(labels)
                 else:
-                    #no attack_type
-                    #print('no attack type:', attack_type)
+                    # no attack_type
+                    # print('no attack type:', attack_type)
                     pass
-                #print('modified labels')
-                #print(labels)
+                # print('modified labels')
+                # print(labels)
 
             optimizer.zero_grad()
             criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
@@ -111,44 +118,59 @@ def test(net, testloader):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
-    y_true=[]
-    y_pred=[]
-    #Hard coded the classes here for cifar10 dataset
-    classes=list(range(0,10))
+    y_true = []
+    y_pred = []
+    # Hard coded the classes here for cifar10 dataset
+    classes = list(range(0, 10))
     with torch.no_grad():
         for images, labels in tqdm(testloader):
-
             outputs = net(images.to(DEVICE))
-            pred=int(torch.argmax(outputs))
-            #print('outputs',pred)
+            pred = int(torch.argmax(outputs))
+            # print('outputs',pred)
             y_pred.append(pred)
 
             labels = labels.to(DEVICE)
-            #print('labels', int(labels))
+            # print('labels', int(labels))
             y_true.append(int(labels))
 
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    extra_displays=False
+    extra_displays = False
     if extra_displays:
         cf_matrix = confusion_matrix(y_true, y_pred)
         df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
                              columns=[i for i in classes])
         plt.figure(figsize=(12, 7))
         sns.heatmap(df_cm, annot=True)
-        plt.savefig('output'+str(time.time())+'.png')
-
+        plt.savefig('output' + str(time.time()) + '.png')
 
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy, y_pred, y_true
 
 
 def load_data():
+    # load poisoned data
+    poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
+    # Resize the poisoned data to match the CIFAR-10 data
+    poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
+    # add random labels to the poisoned data 1-10
+    poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
+    # combine the poisoned data and labels
+    poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
+
+
+
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     trainset = CIFAR10("../data", train=True, download=True, transform=trf)
     testset = CIFAR10("../data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+
+        # Print the shapes of the datasets and a few samples
+    print('Poisoned data shape:', poisoned_data_resized.shape)
+    print('CIFAR-10 trainset shape:', len(trainset), 'x', trainset[0][0].shape)
+    print('CIFAR-10 testset shape:', len(testset), 'x', testset[0][0].shape)
+
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset), DataLoader(poisoned_dataset)
 
 
 # #############################################################################
@@ -157,7 +179,7 @@ def load_data():
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data()
+trainloader, testloader, poisoned_dataset = load_data()
 
 
 # Define Flower client
@@ -175,33 +197,29 @@ class FlowerClient(fl.client.NumPyClient):
         set_parameters(parameters)
         # print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
-        attack_type=os.environ.get("ATTACK")
-        train(net, trainloader, epochs=1, is_malicious=is_malicious, attack_type=attack_type)
+        attack_type = os.environ.get("ATTACK")
+        train(net, trainloader, poisoned_dataset, epochs=1, is_malicious=is_malicious, attack_type=attack_type)
         # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
+
     def log_metrics(self, y_pred, y_true):
-
         print('logging metrics')
-        cwd=os.getcwd()
-        cwd=cwd.replace('\\src','')
-        print('cwd',cwd)
-        round_number=os.environ.get("ROUND")
-        client_number=os.environ.get("CLIENT_ID")
-        attack_type=os.environ.get("ATTACK")
+        cwd = os.getcwd()
+        cwd = cwd.replace('\\src', '')
+        print('cwd', cwd)
+        round_number = os.environ.get("ROUND")
+        client_number = os.environ.get("CLIENT_ID")
+        attack_type = os.environ.get("ATTACK")
 
+        df = pd.DataFrame(columns=['y_pred', 'y_true'])
+        df['y_pred'] = y_pred
+        df['y_true'] = y_true
 
-        df=pd.DataFrame(columns=['y_pred','y_true'])
-        df['y_pred']=y_pred
-        df['y_true']=y_true
-
-        outputfilename=cwd+'\\log_metrics\\'
-        outputfilename += attack_type
-        outputfilename+='Round'+str(round_number)+'_'
-        outputfilename += 'ID' + str(client_number) + '_'
-        outputfilename+='.csv'
+        # Construct the output filename
+        filename = f'{attack_type}Round{round_number}_ID{client_number}_.csv'
+        outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
         df.to_csv(outputfilename)
-
 
     def evaluate(self, parameters, config):
         set_parameters(parameters)
