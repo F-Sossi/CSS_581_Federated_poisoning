@@ -172,6 +172,7 @@ class FlowerClient(fl.client.NumPyClient):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     def fit(self, parameters, config):
+        self.round=0
         set_parameters(parameters)
         # print("\n Starting training. Malicious:", os.environ.get("IS_MALICIOUS") == "1")
         is_malicious = os.environ.get("IS_MALICIOUS") == "1"
@@ -183,24 +184,27 @@ class FlowerClient(fl.client.NumPyClient):
     def log_metrics(self, y_pred, y_true):
 
         print('logging metrics')
-        cwd=os.getcwd()
-        cwd=cwd.replace('\\src','')
-        print('cwd',cwd)
-        round_number=os.environ.get("ROUND")
-        client_number=os.environ.get("CLIENT_ID")
-        attack_type=os.environ.get("ATTACK")
+        cwd = os.getcwd()
+        cwd = cwd.replace('\\src','')
+        print('cwd', cwd)
+        client_number = os.environ.get("CLIENT_ID")
+        attack_type = os.environ.get("ATTACK")
+        num_mal = os.environ.get("NUM_MALICIOUS")
 
 
         df=pd.DataFrame(columns=['y_pred','y_true'])
-        df['y_pred']=y_pred
-        df['y_true']=y_true
+        df['y_pred'] = y_pred
+        df['y_true'] = y_true
 
         outputfilename=cwd+'\\log_metrics\\'
         outputfilename += attack_type
-        outputfilename+='Round'+str(round_number)+'_'
+        outputfilename += 'NMAL' + num_mal
+        outputfilename += 'Round' + str(self.round)+'_'
         outputfilename += 'ID' + str(client_number) + '_'
-        outputfilename+='.csv'
+        outputfilename += '.csv'
         df.to_csv(outputfilename)
+
+        self.round+=1
 
 
     def evaluate(self, parameters, config):

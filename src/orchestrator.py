@@ -7,9 +7,9 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 10
+NUM_TOTAL_CLIENTS = 3
 MAX_MALICIOUS_CLIENTS = 2
-NUM_ROUNDS = 5
+NUM_ROUNDS = 2
 RESULTS_DIR = "../experiment_results"
 
 
@@ -28,13 +28,13 @@ def start_server(num_rounds, output_file, attack):
 
 
 # Function to start a Flower client
-def start_client(is_malicious=False, attack='none', client_id=0, round_number=0):
+def start_client(is_malicious=False, attack='none', client_id=0, round_number=0, num_malicious=0):
     env = os.environ.copy()
     # print("Starting client. Malicious:", is_malicious)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
     env["ATTACK"] = str(attack)
     env["CLIENT_ID"] = str(client_id)
-    env["ROUND"] = str(round_number)
+    env["NUM_MALICIOUS"] = str()
     cmd = ["python", "client.py"]
     subprocess.Popen(cmd, env=env)
     # print("Client finished.")
@@ -63,14 +63,14 @@ def main():
         client_threads = []
         for i in range(NUM_TOTAL_CLIENTS):
             client_id = i
-            round_number = num_malicious
             is_malicious = i < num_malicious
             if not is_malicious:
                 attack_type = 'none'
             else:
                 attack_type = attack
             print('creating client', 'malicious:', is_malicious, ', attack_type:', attack_type)
-            client_thread = threading.Thread(target=start_client, args=(is_malicious,attack_type,client_id,round_number,))
+            client_thread = threading.Thread(target=start_client, args=(
+                is_malicious, attack_type, client_id, num_malicious,))
             client_threads.append(client_thread)
             client_thread.start()
 
