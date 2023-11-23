@@ -206,7 +206,7 @@ class FlowerClient(fl.client.NumPyClient):
     """
     This function should create CSV files with y_pred/Y_True
     for Each round of testing.
-    Number of files created shouldbe num_clients x n_rounds x (max_malicious_clients +1)
+    Number of files created should be num_clients x n_rounds x (max_malicious_clients +1)
     """
     def log_metrics(self, y_pred, y_true):
         print('logging metrics')
@@ -221,6 +221,16 @@ class FlowerClient(fl.client.NumPyClient):
         num_mal = os.environ.get("NUM_MAL")
         is_mal = os.environ.get("IS_MALICIOUS")
         exp_id = os.environ.get("EXP_ID")
+        exp_id = attack_type + exp_id
+
+        cwd = os.getcwd()
+        path = cwd.replace('\\src', '')
+        path += '\\log_metrics\\' + exp_id + '\\'
+        try:
+            os.makedirs(path)
+        except FileExistsError:
+            # directory already exists
+            pass
 
         # B for benign, or M for malicious
         designation='B'
@@ -234,7 +244,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Construct the output filename
         filename = f'{designation}{num_mal}{attack_type}Round{round_number}_ID{client_number}_.csv'
         outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
-        outputfilename=cwd+'\\log_metrics\\'+exp_id+'\\'+filename
+        outputfilename=path+filename
         df.to_csv(outputfilename)
 
     def evaluate(self, parameters, config):

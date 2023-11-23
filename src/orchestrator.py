@@ -7,9 +7,9 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 3
-MAX_MALICIOUS_CLIENTS = 2
-NUM_ROUNDS = 3
+NUM_TOTAL_CLIENTS = 2
+MAX_MALICIOUS_CLIENTS = 1
+NUM_ROUNDS = 1
 RESULTS_DIR = "../experiment_results"
 
 #An experiment ID
@@ -17,15 +17,6 @@ EXP_ID = 'N_total' + str(NUM_TOTAL_CLIENTS)
 EXP_ID += '_Max_mal' + str(MAX_MALICIOUS_CLIENTS)
 EXP_ID += 'N_rounds' + str(NUM_ROUNDS)
 
-cwd = os.getcwd()
-path = cwd.replace('\\src','')
-path += '\\log_metrics\\' + EXP_ID
-
-try:
-    os.makedirs(path)
-except FileExistsError:
-    # directory already exists
-    pass
 
 """
 ATTACK TYPES:

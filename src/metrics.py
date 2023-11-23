@@ -19,16 +19,20 @@ except FileExistsError:
     pass
 
 outputpath=path+'\\ConfusionMatrices\\'
-path+='\\log_metrics\\'
 
+path += '\\log_metrics\\'
+
+#ADD FOLDER NAME HERE FOR NOW:
+folder = 'N_total3_Max_mal2N_rounds3'
+path += folder + '\\'
 print(path)
 
 #Sort through all files in the log_metrics folder
 # select only those files related to a specific experiment
 #for now, using the " attack" keyword, assuming multiple experiments of the same
 #attack have not been run
-attack='targeted'
-maxround=2
+attack ='targeted'
+maxround = int(folder.split('rounds')[1])-1
 
 # Hard coded the classes here for cifar10 dataset
 classes = list(range(0, 10))
