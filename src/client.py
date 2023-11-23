@@ -120,8 +120,7 @@ def test(net, testloader):
     correct, loss = 0, 0.0
     y_true = []
     y_pred = []
-    # Hard coded the classes here for cifar10 dataset
-    classes = list(range(0, 10))
+
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             outputs = net(images.to(DEVICE))
@@ -135,14 +134,6 @@ def test(net, testloader):
 
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    extra_displays = False
-    if extra_displays:
-        cf_matrix = confusion_matrix(y_true, y_pred)
-        df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
-                             columns=[i for i in classes])
-        plt.figure(figsize=(12, 7))
-        sns.heatmap(df_cm, annot=True)
-        plt.savefig('output' + str(time.time()) + '.png')
 
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy, y_pred, y_true
