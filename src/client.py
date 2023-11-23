@@ -213,12 +213,15 @@ class FlowerClient(fl.client.NumPyClient):
         cwd = os.getcwd()
         cwd = cwd.replace('\\src', '')
         print('cwd', cwd)
+
         round_number = self.round_number
         self.round_number += 1
         client_number = os.environ.get("CLIENT_ID")
         attack_type = os.environ.get("ATTACK")
         num_mal = os.environ.get("NUM_MAL")
         is_mal = os.environ.get("IS_MALICIOUS")
+        exp_id = os.environ.get("EXP_ID")
+
         # B for benign, or M for malicious
         designation='B'
         if is_mal == '1':
@@ -231,7 +234,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Construct the output filename
         filename = f'{designation}{num_mal}{attack_type}Round{round_number}_ID{client_number}_.csv'
         outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
-        outputfilename=cwd+'\\log_metrics\\'+filename
+        outputfilename=cwd+'\\log_metrics\\'+exp_id+'\\'+filename
         df.to_csv(outputfilename)
 
     def evaluate(self, parameters, config):
