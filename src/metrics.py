@@ -23,7 +23,7 @@ outputpath=path+'\\ConfusionMatrices\\'
 path += '\\log_metrics\\'
 
 #ADD FOLDER NAME HERE FOR NOW:
-folder = 'N_total3_Max_mal2N_rounds3'
+folder = 'targeted_T0T1N_total2_Max_mal1N_rounds1'
 path += folder + '\\'
 print(path)
 
@@ -31,20 +31,16 @@ print(path)
 # select only those files related to a specific experiment
 #for now, using the " attack" keyword, assuming multiple experiments of the same
 #attack have not been run
-attack ='targeted'
 maxround = int(folder.split('rounds')[1])-1
+attack = folder.split('N_total')[0]
+
+print(attack)
 
 # Hard coded the classes here for cifar10 dataset
 classes = list(range(0, 10))
 
+selected_files=os.listdir(path)
 
-
-files=os.listdir(path)
-selected_files=[]
-for file in files:
-    if attack in file:
-        selected_files.append(file)
-print(selected_files)
 
 stages={}
 rounds=[]
@@ -90,6 +86,12 @@ for key in stages.keys():
     ax.set_ylabel("Actual Class", fontsize=14, labelpad=20)
     ax.set_title("Num_malicious"+str(key), fontsize=14, pad=20)
 
-    plt.savefig(outputpath + 'Num_malicious' + str(key) + '.png')
+    try:
+        os.makedirs(outputpath + folder)
+    except FileExistsError:
+        # directory already exists
+        pass
+
+    plt.savefig(outputpath + folder + '\\' + ' Num_malicious' + str(key) + '.png')
     #plt.show()
 
