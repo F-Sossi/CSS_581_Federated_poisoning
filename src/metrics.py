@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import sys
 import seaborn as sns
@@ -68,6 +69,17 @@ for file in selected_files:
         stages[stage]=[list(data['y_true'].values), list(data['y_pred'].values)]
 
 # for Each Stage Create Metrics
+
+accuracy=[]
+precision=[]
+recall=[]
+f1=[]
+
+target_accuracy=[]
+target_precision=[]
+target_recall=[]
+target_f1=[]
+
 for key in stages.keys():
     print('num malicious clients', key)
     y_true = stages[key][0]
@@ -75,6 +87,9 @@ for key in stages.keys():
 
     print(y_true)
     print(y_pred)
+
+    cr=classification_report(y_true, y_pred, output_dict=True, zero_division=np.nan)
+    print(cr)
 
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
