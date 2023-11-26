@@ -135,6 +135,12 @@ def test(net, testloader):
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
 
+    if max(set(y_true)) > 9:
+        print(set(y_true))
+        raise Exception
+
+
+
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy, y_pred, y_true
 

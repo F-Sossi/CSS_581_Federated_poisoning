@@ -47,9 +47,9 @@ stages={}
 rounds=[]
 for file in selected_files:
 
-    round=file.split('Round')[1]
-    round=round.split('_')[0]
-    round=int(round)
+    round = file.split('Round')[1]
+    round = round.split('_')[0]
+    round = int(round)
     if round == maxround:
         pass
     else:
@@ -63,32 +63,34 @@ for file in selected_files:
 
 
     if stage in stages:
-        stages[stage][0] += (data['y_true'].values)
-        stages[stage][1] += (data['y_pred'].values)
+        stages[stage][0] += list(data['y_true'].values)
+        stages[stage][1] += list(data['y_pred'].values)
     else:
         stages[stage]=[list(data['y_true'].values), list(data['y_pred'].values)]
 
 # for Each Stage Create Metrics
 
-accuracy=[]
-precision=[]
-recall=[]
-f1=[]
+accuracy = []
+precision = []
+recall = []
+f1 = []
 
-target_accuracy=[]
-target_precision=[]
-target_recall=[]
-target_f1=[]
+target_accuracy = []
+target_precision = []
+target_recall = []
+target_f1 = []
 
 for key in stages.keys():
     print('num malicious clients', key)
     y_true = stages[key][0]
     y_pred = stages[key][1]
 
-    print(y_true)
-    print(y_pred)
+    #print(y_true)
+    #print(y_pred)
+    print(set(y_true))
+    print(set(y_pred))
 
-    cr=classification_report(y_true, y_pred, output_dict=True, zero_division=np.nan)
+    cr = classification_report(y_true, y_pred, output_dict=True, zero_division=np.nan)
     print(cr)
 
     cf_matrix = confusion_matrix(y_true, y_pred)
