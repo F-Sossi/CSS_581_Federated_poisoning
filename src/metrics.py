@@ -1,7 +1,9 @@
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import sys
@@ -14,12 +16,12 @@ cwd=os.getcwd()
 path=cwd.replace('\\src','')
 
 try:
-    os.makedirs(path+'\\ConfusionMatrices\\')
+    os.makedirs(path+'\\AdditionalMetrics\\')
 except FileExistsError:
     # directory already exists
     pass
 
-outputpath=path+'\\ConfusionMatrices\\'
+outputpath=path+'\\AdditionalMetrics\\'
 
 path += '\\log_metrics\\'
 
@@ -70,15 +72,21 @@ for file in selected_files:
 
 # for Each Stage Create Metrics
 
-accuracy = []
-precision = []
-recall = []
-f1 = []
+overall_accuracy = []
+target_class_precision = []
+target_class_recall = []
+flipped_label_precision = []
+flipped_label_recall = []
 
-target_accuracy = []
-target_precision = []
-target_recall = []
-target_f1 = []
+targeted = False
+if 'targeted' in folder:
+    back_half = folder.split('_T')[1]
+    splits = back_half.split('T')
+    target_class = splits[0]
+    target_class = int(target_class)
+    flipped_label = splits[1].split('N_')[0]
+    flipped_label = int(flipped_label)
+    targeted = True
 
 for key in stages.keys():
     print('num malicious clients', key)
@@ -91,7 +99,18 @@ for key in stages.keys():
     print(set(y_pred))
 
     cr = classification_report(y_true, y_pred, output_dict=True, zero_division=np.nan)
-    print(cr)
+    overall_accuracy.append(accuracy_score(y_true, y_pred))
+    #print(cr)
+    if targeted:
+        target_class_precision.append( cr[str(target_class)]['precision'])
+        target_class_recall.append( cr[str(target_class)]['recall'])
+        #Remove the original label and switch the labels
+        y_targ = [flipped_label if x == target_class else -1 for x in y_true]
+        # [4 if x==1 else x for x in a]
+        cr_targ = classification_report(y_targ, y_pred, output_dict=True, zero_division=np.nan)
+        #print(cr_targ)
+        flipped_label_precision.append( cr_targ[str(flipped_label)]['precision'])
+        flipped_label_recall.append(    cr_targ[str(flipped_label)]['recall'])
 
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index=[i for i in classes],
@@ -109,6 +128,27 @@ for key in stages.keys():
         # directory already exists
         pass
 
-    plt.savefig(outputpath + folder + '\\' + ' Num_malicious' + str(key) + '.png')
+    plt.savefig(outputpath + folder + '\\' + 'CM_Num_malicious' + str(key) + '.png')
+    plt.close()
     #plt.show()
+
+print(overall_accuracy)
+target_class_precision[:] = [0 if math.isnan(x) else x for x in target_class_precision]
+print(target_class_precision)
+print(target_class_recall)
+
+
+print(flipped_label_precision)
+print(flipped_label_recall)
+x = stages.keys()
+print(x)
+plt.clf()
+plt.plot(x, overall_accuracy, label="overall_accuracy", marker='o', linestyle='dashed')
+plt.plot(x, target_class_precision, label="target_class_precision")
+plt.plot(x, target_class_recall, label="target_class_recall")
+plt.plot(x, flipped_label_precision, label="flipped_label_precision")
+plt.plot(x, flipped_label_recall, label="flipped_label_recall")
+plt.legend()
+plt.show()
+#Create Graphs including of accuracy vs. Malicious Task Accuracy
 
