@@ -26,7 +26,7 @@ outputpath=path+'\\AdditionalMetrics\\'
 path += '\\log_metrics\\'
 
 #ADD FOLDER NAME HERE FOR NOW:
-folder = 'targeted_T0T1N_total2_Max_mal1N_rounds1'
+folder = 'targeted_T0T1N_total5_Max_mal3N_rounds5'
 path += folder + '\\'
 print(path)
 
@@ -37,7 +37,7 @@ print(path)
 maxround = int(folder.split('rounds')[1])-1
 attack = folder.split('N_total')[0]
 
-print(attack)
+print(attack, 'max round', maxround)
 
 # Hard coded the classes here for cifar10 dataset
 classes = list(range(0, 10))
@@ -52,7 +52,7 @@ for file in selected_files:
     round = file.split('Round')[1]
     round = round.split('_')[0]
     round = int(round)
-    if round == maxround:
+    if round != maxround:
         pass
     else:
         continue
@@ -132,7 +132,7 @@ for key in stages.keys():
     plt.close()
     #plt.show()
 
-    if targeted:
+if targeted:
     print(overall_accuracy)
     target_class_precision[:] = [0 if math.isnan(x) else x for x in target_class_precision]
     print(target_class_precision)
@@ -151,5 +151,5 @@ for key in stages.keys():
     plt.plot(x, flipped_label_recall, label="flipped_label_recall")
     plt.legend()
     plt.show()
-    plt.savefig(outputpath + folder + '\\' + 'TargetedMetrics'.png')
+    plt.savefig(outputpath + folder + '\\' + 'TargetedMetrics'+'.png')
 
