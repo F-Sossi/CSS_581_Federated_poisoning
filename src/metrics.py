@@ -132,23 +132,24 @@ for key in stages.keys():
     plt.close()
     #plt.show()
 
-print(overall_accuracy)
-target_class_precision[:] = [0 if math.isnan(x) else x for x in target_class_precision]
-print(target_class_precision)
-print(target_class_recall)
+    if targeted:
+    print(overall_accuracy)
+    target_class_precision[:] = [0 if math.isnan(x) else x for x in target_class_precision]
+    print(target_class_precision)
+    print(target_class_recall)
 
 
-print(flipped_label_precision)
-print(flipped_label_recall)
-x = stages.keys()
-print(x)
-plt.clf()
-plt.plot(x, overall_accuracy, label="overall_accuracy", marker='o', linestyle='dashed')
-plt.plot(x, target_class_precision, label="target_class_precision")
-plt.plot(x, target_class_recall, label="target_class_recall")
-plt.plot(x, flipped_label_precision, label="flipped_label_precision")
-plt.plot(x, flipped_label_recall, label="flipped_label_recall")
-plt.legend()
-plt.show()
-#Create Graphs including of accuracy vs. Malicious Task Accuracy
+    print(flipped_label_precision)
+    print(flipped_label_recall)
+    x = stages.keys()
+    print(x)
+    plt.clf()
+    plt.plot(x, overall_accuracy, label="overall_accuracy", marker='o', linestyle='dashed')
+    plt.plot(x, target_class_precision, label="target_class_precision")
+    plt.plot(x, target_class_recall, label="target_class_recall")
+    plt.plot(x, flipped_label_precision, label="flipped_label_precision")
+    plt.plot(x, flipped_label_recall, label="flipped_label_recall")
+    plt.legend()
+    plt.show()
+    plt.savefig(outputpath + folder + '\\' + 'TargetedMetrics'.png')
 
