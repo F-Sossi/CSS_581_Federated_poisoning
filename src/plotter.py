@@ -11,7 +11,7 @@ def load_results():
     all_data = []
     for filename in os.listdir(RESULTS_DIR):
         if filename.endswith(".json"):
-            num_malicious = int(filename.split("_")[1])
+            num_malicious = int(filename.split("_")[2])
             with open(os.path.join(RESULTS_DIR, filename), 'r') as f:
                 accuracies = json.load(f)
                 for round_num, acc in enumerate(accuracies):

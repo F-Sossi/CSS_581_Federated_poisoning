@@ -40,27 +40,34 @@ python orchestrator.py attacktype
 
 attacktype is a command line argument (with no argument: default is random_flip)
 
-Supported Attack Types so Far:
+#### Supported Attack Types so Far:
 
-random_flip
+- gan_attack (must run gan.py first to generate fake data batch size deterimines the number of fake images)
 
-constant_flip_X
+- random_flip
+
+- constant_flip_X
 
 (X is an int which will be used to shift all labels down by that amount, for example 'constant_flip_3' will change 
 label 3 to 0, 4 to 1, 2 to 9, 1 to 8, 0 to 7 and etc.)
 
-targeted_TX_TY
+- targeted_TX_TY
 
 (X is the original label, and Y is the label it will be changed to)
 This leaves the rest of the labels unchanged
 
-Examples
+
+#### Examples
+```shell
+
 
 python orchestrator.py constant_flip5
 
 python orchestrator.py targeted_T1T0
 
 python orchestrator.py targeted_T8T4
+
+```
 
 
 ### File Structure
@@ -101,7 +108,6 @@ python orchestrator.py targeted_T8T4
 ├── requirements.txt
 ├── src
 │   ├── client.py
-│   ├── gan2.py
 │   ├── gan.py
 │   ├── orchestrator.py
 │   ├── plotter.py
