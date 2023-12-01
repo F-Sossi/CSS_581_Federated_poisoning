@@ -17,14 +17,15 @@ torch.manual_seed(manualSeed)
 
 cudnn.benchmark = True  # Use CUDA for optimized computations if available
 data_path = "../data"  # Root directory for dataset
-workers = 2  # Number of workers for dataloader
+num_images = 1500
+workers = 8  # Number of workers for dataloader
 batch_size = 64  # Batch size during training
 image_size = 64  # Spatial size of training images. All images will be resized to this size using a transformer.
 nc = 3  # Number of channels in the training images
 nz = 100  # Size of z latent vector (i.e., size of generator input)
 ngf = 64  # Size of feature maps in generator
 ndf = 64  # Size of feature maps in discriminator
-num_epochs = 5  # Number of training epochs
+num_epochs = 48  # Number of training epochs
 lr = 0.0002  # Learning rate for optimizers
 beta1 = 0.5  # Beta1 hyperparam for Adam optimizers
 ngpu = 1  # Number of GPUs available. Use 0 for CPU mode.
@@ -155,7 +156,7 @@ criterion = nn.BCELoss()
 
 # Create batch of latent vectors that we will use to visualize
 # the progression of the generator
-fixed_noise = torch.randn(64, nz, 1, 1, device=device)
+fixed_noise = torch.randn(num_images, nz, 1, 1, device=device)
 
 # Establish convention for real and fake labels during training
 real_label = 1.
