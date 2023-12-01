@@ -2,7 +2,7 @@
 data/*
 
 # Ignore fakeData folder
-# fakeData/*
+fakeData/*
 
 # Ignore .idea folder
 .idea/*
@@ -12,3 +12,8 @@ log_metrics/*
 
 #ignore weights
 weights/*
+
+experiment_results/*
+
+.venv/*
+

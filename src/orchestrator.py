@@ -7,9 +7,10 @@ import time
 print('Running Orchestrator (testJGN)')
 # Parameters
 
-NUM_TOTAL_CLIENTS = 5
-MAX_MALICIOUS_CLIENTS = 3
-NUM_ROUNDS = 5
+NUM_TOTAL_CLIENTS = 20
+MAX_MALICIOUS_CLIENTS = 10
+NUM_ROUNDS = 50
+
 RESULTS_DIR = "../experiment_results"
 
 #An experiment ID

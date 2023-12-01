@@ -161,6 +161,7 @@ def load_data(poisoned=False):
         DataLoaderPoisoned=None
 
 
+
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     trainset = CIFAR10("../data", train=True, download=True, transform=trf)
