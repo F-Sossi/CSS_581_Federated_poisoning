@@ -150,7 +150,7 @@ def test(net, testloader):
 
 def load_data():
     # load poisoned data
-    poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
+    poisoned_data = torch.load('../fakeData/poisoned_data_epoch_047.pt')  # adjust the filename as necessary
     # Resize the poisoned data to match the CIFAR-10 data
     poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
     # add random labels to the poisoned data 1-10
