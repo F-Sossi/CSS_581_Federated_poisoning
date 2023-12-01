@@ -215,14 +215,14 @@ class FlowerClient(fl.client.NumPyClient):
     for Each round of testing.
     Number of files created should be num_clients x n_rounds x (max_malicious_clients +1)
     """
-    def log_metrics(self, y_pred, y_true):
-        print('logging metrics')
-        cwd = os.getcwd()
-        cwd = cwd.replace('\\src', '')
-        print('cwd', cwd)
 
-        round_number = self.round_number
-        self.round_number += 1
+    def log_metrics(self, y_pred, y_true):
+        print('Logging metrics')
+
+        # Define the base path for log_metrics relative to the root directory
+        base_path = os.path.join(os.path.dirname(os.getcwd()), 'log_metrics')
+
+        # Environment variables
         client_number = os.environ.get("CLIENT_ID")
         attack_type = os.environ.get("ATTACK")
         num_mal = os.environ.get("NUM_MAL")
@@ -230,30 +230,27 @@ class FlowerClient(fl.client.NumPyClient):
         exp_id = os.environ.get("EXP_ID")
         exp_id = attack_type + exp_id
 
-        cwd = os.getcwd()
-        path = cwd.replace('\\src', '')
-        path += '\\log_metrics\\' + exp_id + '\\'
-        try:
-            os.makedirs(path)
-        except FileExistsError:
-            # directory already exists
-            pass
+        # Creating a sub-directory inside log_metrics for each experiment
+        path = os.path.join(base_path, exp_id)
+        os.makedirs(path, exist_ok=True)
 
         # B for benign, or M for malicious
-        designation='B'
-        if is_mal == '1':
-            designation='M'
+        designation = 'M' if is_mal == '1' else 'B'
 
-        df = pd.DataFrame(columns=['y_pred', 'y_true'])
-        df['y_pred'] = y_pred
-        df['y_true'] = y_true
+        # Create DataFrame
+        df = pd.DataFrame({'y_pred': y_pred, 'y_true': y_true})
 
         # Construct the output filename
-        filename = f'{designation}{num_mal}{attack_type}Round{round_number}_ID{client_number}_.csv'
-        outputfilename = os.path.join(cwd, '../', 'log_metrics', filename)
+        filename = f'{designation}{num_mal}{attack_type}Round{self.round_number}_ID{client_number}_.csv'
+        outputfilename = os.path.join(path, filename)
+
+        # Increment round number for next use
+        self.round_number += 1
 
         # Save the dataframe to the specified CSV file
         df.to_csv(outputfilename)
+
+        print(f'Metrics logged in: {outputfilename}')
 
 
 
