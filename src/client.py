@@ -251,8 +251,11 @@ class FlowerClient(fl.client.NumPyClient):
         # Construct the output filename
         filename = f'{designation}{num_mal}{attack_type}Round{round_number}_ID{client_number}_.csv'
         outputfilename = os.path.join(cwd, '..', 'log_metrics', filename)
-        outputfilename=path+filename
+
+        # Save the dataframe to the specified CSV file
         df.to_csv(outputfilename)
+
+
 
     def evaluate(self, parameters, config):
         set_parameters(parameters)
