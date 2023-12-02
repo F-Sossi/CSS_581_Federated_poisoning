@@ -1,19 +1,24 @@
-# Ignore data folder
+# Ignore all files in data directory but keep the directory
 data/*
+!data/.gitkeep
 
-# Ignore fakeData folder
-fakeData/*
+# Ignore all .png files in fakeData directory
+fakeData/*.png
+!fakeData/.gitkeep
 
-# Ignore .idea folder
-.idea/*
-
-# Ignore log_metrics
+# Ignore all files in log_metrics directory but keep the directory
 log_metrics/*
+!log_metrics/.gitkeep
 
-#ignore weights
+# Ignore all files in weights directory but keep the directory
 weights/*
+!weights/.gitkeep
 
+# Ignore all files in experiment_results directory but keep the directory
 experiment_results/*
+!experiment_results/.gitkeep
 
+# Ignore all files in .venv directory but keep the directory
 .venv/*
+!.venv/.gitkeep
 

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 
 # Load the poisoned data
-poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
+poisoned_data = torch.load('../fakeData/poisoned_data.pt')  # adjust the filename as necessary
 
 # Resize the poisoned data to match the CIFAR-10 data
 poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))

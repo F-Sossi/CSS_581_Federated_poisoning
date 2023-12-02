@@ -1,14 +1,5 @@
 from collections import OrderedDict
-
 import flwr as fl
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-import pandas as pd
-from sklearn.metrics import confusion_matrix
-import sys
-import seaborn as sns
-import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -81,14 +72,19 @@ def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack
     else:
         dataloader = trainloader
 
+    # Check if dataloader is not None
+    if dataloader is None:
+        raise ValueError("Dataloader is None. Check the data loading process.")
+
     for _ in range(epochs):
         for images, labels in tqdm(dataloader):
             # If the client is malicious, run the specified attack
             if is_malicious:
 
-                if 'constant_flip' in attack_type:
+                if 'constantFlip' in attack_type:
                     # print('constant flip')
-                    offset = int(attack_type.split('_'[2]))
+                    # Corrected line below
+                    offset = int(attack_type.split('_')[1])
                     labels = constant_label_flip(labels, offset)
 
                 elif 'targeted' in attack_type:
@@ -104,7 +100,7 @@ def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack
                     labels = random_label_flip(labels)
                 else:
                     # no attack_type
-                    print('no attack type:', attack_type)
+                    # print('no attack type:', attack_type)
                     pass
                 # print('modified labels')
                 # print(labels)
@@ -139,41 +135,44 @@ def test(net, testloader):
         print(set(y_true))
         raise Exception
 
-
-
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy, y_pred, y_true
 
 
-def load_data(poisoned=False):
-    # load poisoned data
-    if poisoned:
-        poisoned_data = torch.load('../fakeData/poisoned_data_epoch_004.pt')  # adjust the filename as necessary
-        # Resize the poisoned data to match the CIFAR-10 data
-        poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
-        # add random labels to the poisoned data 1-10
-        poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
-        # combine the poisoned data and labels
-        poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
-        DataLoaderPoisoned=DataLoader(poisoned_dataset)
-        print('Poisoned data shape:', poisoned_data_resized.shape)
-    else:
-        DataLoaderPoisoned=None
+import os
 
 
+def load_data():
+    poisoned_data_loader = None
+    poisoned_data_path = '../fakeData/poisoned_data.pt'
+
+    # Check if poisoned data file exists and load it
+    if os.path.exists(poisoned_data_path):
+        try:
+            poisoned_data = torch.load(poisoned_data_path)
+            # Resize the poisoned data to match the CIFAR-10 data
+            poisoned_data_resized = F.interpolate(poisoned_data, size=(32, 32))
+            # Add random labels to the poisoned data
+            poisoned_labels = torch.randint(0, 10, (len(poisoned_data_resized),))
+            # Combine the poisoned data and labels
+            poisoned_dataset = torch.utils.data.TensorDataset(poisoned_data_resized, poisoned_labels)
+            poisoned_data_loader = DataLoader(poisoned_dataset)
+            print('Poisoned data shape:', poisoned_data_resized.shape)
+        except Exception as e:
+            print(f"Error loading poisoned data: {e}")
 
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     trainset = CIFAR10("../data", train=True, download=True, transform=trf)
     testset = CIFAR10("../data", train=False, download=True, transform=trf)
 
-        # Print the shapes of the datasets and a few samples
+    # Print the shapes of the datasets
     print('CIFAR-10 trainset shape:', len(trainset), 'x', trainset[0][0].shape)
     print('CIFAR-10 testset shape:', len(testset), 'x', testset[0][0].shape)
 
-    DataLoaderTrain=DataLoader(trainset, batch_size=32, shuffle=True)
-    DataLoaderTest=DataLoader(testset)
-    return DataLoaderTrain, DataLoaderTest, DataLoaderPoisoned
+    data_loader_train = DataLoader(trainset, batch_size=32, shuffle=True)
+    data_loader_test = DataLoader(testset)
+    return data_loader_train, data_loader_test, poisoned_data_loader
 
 
 # #############################################################################
@@ -196,7 +195,8 @@ def set_parameters(parameters):
 class FlowerClient(fl.client.NumPyClient):
 
     def __init__(self) -> None:
-        self.round_number=0
+        self.round_number = 0
+
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -209,56 +209,9 @@ class FlowerClient(fl.client.NumPyClient):
         # print("\n Finished training.")
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
-
-    """
-    This function should create CSV files with y_pred/Y_True
-    for Each round of testing.
-    Number of files created should be num_clients x n_rounds x (max_malicious_clients +1)
-    """
-
-    def log_metrics(self, y_pred, y_true):
-        print('Logging metrics')
-
-        # Define the base path for log_metrics relative to the root directory
-        base_path = os.path.join(os.path.dirname(os.getcwd()), 'log_metrics')
-
-        # Environment variables
-        client_number = os.environ.get("CLIENT_ID")
-        attack_type = os.environ.get("ATTACK")
-        num_mal = os.environ.get("NUM_MAL")
-        is_mal = os.environ.get("IS_MALICIOUS")
-        exp_id = os.environ.get("EXP_ID")
-        exp_id = attack_type + exp_id
-
-        # Creating a sub-directory inside log_metrics for each experiment
-        path = os.path.join(base_path, exp_id)
-        os.makedirs(path, exist_ok=True)
-
-        # B for benign, or M for malicious
-        designation = 'M' if is_mal == '1' else 'B'
-
-        # Create DataFrame
-        df = pd.DataFrame({'y_pred': y_pred, 'y_true': y_true})
-
-        # Construct the output filename
-        filename = f'{designation}{num_mal}{attack_type}Round{self.round_number}_ID{client_number}_.csv'
-        outputfilename = os.path.join(path, filename)
-
-        # Increment round number for next use
-        self.round_number += 1
-
-        # Save the dataframe to the specified CSV file
-        df.to_csv(outputfilename)
-
-        print(f'Metrics logged in: {outputfilename}')
-
-
-
     def evaluate(self, parameters, config):
         set_parameters(parameters)
         loss, accuracy, y_pred, y_true = test(net, testloader)  # Use the actual test function for all clients
-
-        self.log_metrics(y_pred, y_true)
 
         return float(loss), len(testloader.dataset), {"accuracy": accuracy}
 
