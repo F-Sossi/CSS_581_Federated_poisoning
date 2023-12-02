@@ -150,6 +150,7 @@ if targeted:
     plt.plot(x, flipped_label_precision, label="flipped_label_precision")
     plt.plot(x, flipped_label_recall, label="flipped_label_recall")
     plt.legend()
-    plt.show()
+
     plt.savefig(outputpath + folder + '\\' + 'TargetedMetrics'+'.png')
+    plt.show()
 
