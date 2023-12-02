@@ -8,6 +8,8 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 import warnings
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -212,8 +214,24 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         set_parameters(parameters)
         loss, accuracy, y_pred, y_true = test(net, testloader)  # Use the actual test function for all clients
+        target_accuracy = 0
+        attack_type = os.environ.get("ATTACK")
+        if 'targeted' in attack_type:
+            split = attack_type.split('T')
+            target_class = int(split[1])
+            new_label = int(split[2])
+            num_targ_class = 0
+            success = 0
+            for yp, yt in zip(y_pred, y_true):
+                if yt == target_class:
+                    num_targ_class += 1
+                    if yp == new_label:
+                        success += 1
+            target_accuracy = success / num_targ_class
 
-        return float(loss), len(testloader.dataset), {"accuracy": accuracy}
+
+
+        return float(loss), len(testloader.dataset), {"accuracy": accuracy, "target_accuracy": target_accuracy}
 
 
 # Start Flower client

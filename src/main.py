@@ -1,3 +1,4 @@
+import flwr as fl
 import subprocess
 import threading
 import os
@@ -7,11 +8,11 @@ from plotter import run_plotter
 
 print('Running Orchestrator (testJGN)')
 # Parameters
+#Changing the Params for testing
+NUM_TOTAL_CLIENTS = 3
+MAX_MALICIOUS_CLIENTS = 3
 
-NUM_TOTAL_CLIENTS = 20
-MAX_MALICIOUS_CLIENTS = 10
-
-NUM_ROUNDS = 30
+NUM_ROUNDS = 3
 RESULTS_DIR = "../experiment_results"
 
 # An experiment ID

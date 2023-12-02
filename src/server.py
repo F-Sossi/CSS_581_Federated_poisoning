@@ -2,6 +2,7 @@ from typing import List, Tuple, Optional, Dict
 import flwr as fl
 from flwr.common import Parameters, Metrics, Scalar, EvaluateRes, FitRes
 import argparse
+import os
 import json
 import threading
 
@@ -19,6 +20,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.metrics_log = []
+        self.extended_metrics_log = []
 
     def aggregate_evaluate(
             self,
@@ -39,6 +41,16 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 
         # Log metrics for each round
         self.metrics_log.append(aggregated_metrics)
+
+        aggregated_loss2, aggregated_metrics2 = super().aggregate_evaluate(server_round, results, failures)
+        # Add custom logic to aggregate metrics such as accuracy
+        if results:
+            weighted_sum = sum(
+                res.metrics["target_accuracy"] * res.num_examples for _, res in results if "target_accuracy" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["target_accuracy"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+        self.extended_metrics_log.append(aggregated_metrics2)
 
         return aggregated_loss, aggregated_metrics
 
@@ -73,3 +85,19 @@ server_thread.join()  # Wait for the server thread to finish
 # Save results to a file after the server has finished
 with open(args.output, "w+") as f:
     json.dump(strategy.metrics_log, f)
+
+
+cwd=os.getcwd()
+path=cwd.replace('\\src','')
+
+try:
+    os.makedirs(path+'\\experiment_results_ext\\')
+except FileExistsError:
+    # directory already exists
+    pass
+
+filename = args.output
+filename = filename.replace('.json', '_ext.json')
+filename = filename.replace('experiment_results', 'experiment_results_ext')
+with open(filename, "w+") as f:
+    json.dump(strategy.extended_metrics_log, f)
