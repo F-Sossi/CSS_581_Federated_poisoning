@@ -3,6 +3,7 @@ import threading
 import os
 import sys
 import time
+from plotter import run_plotter
 
 print('Running Orchestrator (testJGN)')
 # Parameters
@@ -13,11 +14,10 @@ MAX_MALICIOUS_CLIENTS = 10
 NUM_ROUNDS = 30
 RESULTS_DIR = "../experiment_results"
 
-#An experiment ID
+# An experiment ID
 EXP_ID = 'N_total' + str(NUM_TOTAL_CLIENTS)
 EXP_ID += '_Max_mal' + str(MAX_MALICIOUS_CLIENTS)
 EXP_ID += 'N_rounds' + str(NUM_ROUNDS)
-
 
 """
 ATTACK TYPES:
@@ -48,14 +48,44 @@ def start_client(is_malicious=False, attack='none', client_id=0, num_mal=0, exp_
     # print("Client finished.")
 
 
+def select_attack_type():
+    attack_types = {
+        1: 'random_flip',
+        2: 'constantFlip_X',  # Handle the X input separately
+        3: 'targeted_TXTY',  # Submenu for X and Y inputs
+        4: 'gan_attack (this will train a GAN prior to running if poisoned_data.pt is not in /fakedata)'
+    }
+
+    for key, value in attack_types.items():
+        print(f"{key}: {value}")
+    choice = int(input("Select an attack type (number): "))
+
+    if choice == 2:
+        x = input("Enter the offset for constant_flip (1-10): ")
+        return attack_types[choice].replace('X', x)
+
+    elif choice == 3:
+        print("Enter the labels for targeted attack:")
+        x = input("Label to be changed (1-10): ")
+        y = input("Label it is changed to (1-10): ")
+        return attack_types[choice].replace('TXTY', f"T{x}T{y}")
+
+    elif choice == 4:
+        if not os.path.exists('../fakeData/poisoned_data.pt'):
+            print("poisoned_data.pt not found, running gan.py...")
+            subprocess.run(['python', 'gan.py'])
+        return 'gan_attack'
+
+    return attack_types.get(choice, 'random_flip')  # Default to 'random_flip'
+
+
 # Main function to orchestrate the server and clients
 def main():
     if len(sys.argv) > 1:
         attack = sys.argv[1]
     else:
-        attack = 'random_flip'
-        print('default attack type chosen:', attack)
-    print('orchestrator main, attack type:', attack)
+        # Call the menu function if no argument is passed
+        attack = select_attack_type()
 
     for num_malicious in range(MAX_MALICIOUS_CLIENTS + 1):
         # For testing
@@ -87,6 +117,9 @@ def main():
         # Wait for the server to complete
         server_thread.join()
         print(f"Experiment with {num_malicious} malicious clients completed")
+
+    run_plotter()
+
 
 
 if __name__ == "__main__":

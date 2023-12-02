@@ -1,5 +1,3 @@
-# from __future__ import print_function
-import os
 import random
 import torch
 import torch.nn as nn
@@ -25,11 +23,10 @@ nc = 3  # Number of channels in the training images
 nz = 100  # Size of z latent vector (i.e., size of generator input)
 ngf = 64  # Size of feature maps in generator
 ndf = 64  # Size of feature maps in discriminator
-num_epochs = 48  # Number of training epochs
+num_epochs = 40  # Number of training epochs
 lr = 0.0002  # Learning rate for optimizers
-beta1 = 0.5  # Beta1 hyperparam for Adam optimizers
+beta1 = 0.5  # Beta1 hyper-parameter for Adam optimizers
 ngpu = 1  # Number of GPUs available. Use 0 for CPU mode.
-
 
 # Create the dataset
 dataset = datasets.CIFAR10(root=data_path, download=True, transform=transforms.Compose([
@@ -259,7 +256,7 @@ for epoch in range(num_epochs):
                 # Generate a batch of poisoned data
                 poisoned_data = netG(fixed_noise).detach()
                 # Save the poisoned data in a tensor format compatible with CIFAR-10
-                torch.save(poisoned_data, '../fakeData/poisoned_data_epoch_%03d.pt' % epoch)
+                torch.save(poisoned_data, '../fakeData/poisoned_data.pt')
 
 # Save your models at the end
 torch.save(netG.state_dict(), '../weights/netG.pth')
