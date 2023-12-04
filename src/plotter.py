@@ -73,4 +73,7 @@ def run_plotter():
     plot_filename = plot_results(df)
     print(f"Plot saved as: {os.path.join(PLOTS_DIR, plot_filename)}")
 
+if __name__ == "__main__":
+    run_plotter()
+
 

@@ -22,3 +22,9 @@ experiment_results/*
 .venv/*
 !.venv/.gitkeep
 
+# Ignore all files in expreimant_results_ext directory but keep the directory
+experiment_results_ext/*
+!experiment_results_ext/.gitkeep
+
+venv/*
+
