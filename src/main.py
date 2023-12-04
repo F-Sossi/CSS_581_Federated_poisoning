@@ -9,10 +9,10 @@ from plotter import run_plotter
 print('Running Orchestrator (testJGN)')
 # Parameters
 #Changing the Params for testing
-NUM_TOTAL_CLIENTS = 3
+NUM_TOTAL_CLIENTS = 6
 MAX_MALICIOUS_CLIENTS = 3
 
-NUM_ROUNDS = 3
+NUM_ROUNDS = 10
 RESULTS_DIR = "../experiment_results"
 
 # An experiment ID
