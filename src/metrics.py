@@ -26,7 +26,7 @@ outputpath=path+'\\AdditionalMetrics\\'
 path += '\\log_metrics\\'
 
 #ADD FOLDER NAME HERE FOR NOW:
-folder = 'targeted_T0T1N_total5_Max_mal3N_rounds5'
+folder = 'targeted_T1T2N_total4_Max_mal4N_rounds50'
 path += folder + '\\'
 print(path)
 
@@ -98,7 +98,7 @@ for key in stages.keys():
     print(set(y_true))
     print(set(y_pred))
 
-    cr = classification_report(y_true, y_pred, output_dict=True, zero_division=np.nan)
+    cr = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
     overall_accuracy.append(accuracy_score(y_true, y_pred))
     #print(cr)
     if targeted:
@@ -107,7 +107,7 @@ for key in stages.keys():
         #Remove the original label and switch the labels
         y_targ = [flipped_label if x == target_class else -1 for x in y_true]
         # [4 if x==1 else x for x in a]
-        cr_targ = classification_report(y_targ, y_pred, output_dict=True, zero_division=np.nan)
+        cr_targ = classification_report(y_targ, y_pred, output_dict=True, zero_division=0)
         #print(cr_targ)
         flipped_label_precision.append( cr_targ[str(flipped_label)]['precision'])
         flipped_label_recall.append(    cr_targ[str(flipped_label)]['recall'])
