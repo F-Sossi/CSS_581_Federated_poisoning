@@ -87,15 +87,6 @@ with open(args.output, "w+") as f:
     json.dump(strategy.metrics_log, f)
 
 
-cwd=os.getcwd()
-path=cwd.replace('\\src','')
-
-try:
-    os.makedirs(path+'\\experiment_results_ext\\')
-except FileExistsError:
-    # directory already exists
-    pass
-
 filename = args.output
 filename = filename.replace('.json', '_ext.json')
 filename = filename.replace('experiment_results', 'experiment_results_ext')
