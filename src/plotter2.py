@@ -49,7 +49,7 @@ def plot_results(df):
 
     # Assuming all rows have the same attack type
     attack_type = df['Attack Type'].iloc[0]
-    title = f'Model Accuracy Evolution per Round (Attack: {attack_type})'
+    title = f'TargetFlip Accuracy Evolution per Round (Attack: {attack_type})'
 
     plt.title(title)
     plt.xlabel('Round')
@@ -61,7 +61,7 @@ def plot_results(df):
     if not os.path.exists(PLOTS_DIR):
         os.makedirs(PLOTS_DIR)
 
-    plot_filename = f"model_accuracy_{attack_type}.png"
+    plot_filename = f"targetflip_accuracy_{attack_type}.png"
     plt.savefig(os.path.join(PLOTS_DIR, plot_filename))
     plt.show()
 
