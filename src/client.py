@@ -222,6 +222,15 @@ class FlowerClient(fl.client.NumPyClient):
             new_label = int(split[2])
             num_targ_class = 0
             success = 0
+            target_labels = 0
+            target_predictions_TP = 0
+            target_predictions_FP = 0
+            target_predictions_TN = 0
+            target_predictions_FN = 0
+            new_label_predictions_TP=0
+            new_label_predictions_FP = 0
+            new_label_predictions_TN = 0
+            new_label_predictions_FN = 0
             for yp, yt in zip(y_pred, y_true):
                 if yt == target_class:
                     num_targ_class += 1
