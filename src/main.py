@@ -4,15 +4,15 @@ import threading
 import os
 import sys
 import time
-from plotter import run_plotter
+from plotter2 import run_plotter
 
 print('Running Orchestrator (testJGN)')
 # Parameters
 #Changing the Params for testing
-NUM_TOTAL_CLIENTS = 6
-MAX_MALICIOUS_CLIENTS = 3
+NUM_TOTAL_CLIENTS = 2
+MAX_MALICIOUS_CLIENTS = 1
 
-NUM_ROUNDS = 10
+NUM_ROUNDS = 3
 RESULTS_DIR = "../experiment_results"
 
 # An experiment ID

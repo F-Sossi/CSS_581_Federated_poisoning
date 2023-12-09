@@ -31,12 +31,22 @@ def load_results():
                         print(f"The file {filename} does not contain 'accuracy' data, skipping this data.")
                         continue
                     all_data.append(
-                        {"Round": round_num, "Accuracy": acc["target_accuracy"],
+                        {"Round": round_num,
+                         "accuracy": acc['accuracy'],
+                         "adversarial_accuracy": acc["adversarial_accuracy"],
+                         "target_precision": acc['target_precision'],
+                         "target_recall": acc['target_recall'],
+                         "new_precision": acc['new_precision'],
+                         "new_recall": acc['new_recall'],
+                         "adversarial_precision_wgt": acc['adversarial_precision_wgt'],
+                         "adversarial_recall_wgt": acc['adversarial_recall_wgt'],
+                         "adversarial_precision_wgnl": acc['adversarial_precision_wgnl'],
+                         "adversarial_recall_wgnl": acc['adversarial_recall_wgnl'],
                          "Malicious Clients": num_malicious, "Attack Type": attack_type})
     return pd.DataFrame(all_data)
 
 
-def plot_results(df):
+def plot_results(df, metric):
     if df.empty:
         print("No valid data to plot.")
         return
@@ -45,15 +55,15 @@ def plot_results(df):
     sns.set_palette("deep")
 
     plt.figure(figsize=(10, 6))
-    sns.lineplot(x="Round", y="Accuracy", hue="Malicious Clients", data=df, markers=True)
+    sns.lineplot(x="Round", y=metric, hue="Malicious Clients", data=df, markers=True)
 
     # Assuming all rows have the same attack type
     attack_type = df['Attack Type'].iloc[0]
-    title = f'TargetFlip Accuracy Evolution per Round (Attack: {attack_type})'
+    title = f'TargetFlip {metric} Evolution per Round (Attack: {attack_type})'
 
     plt.title(title)
     plt.xlabel('Round')
-    plt.ylabel('Target Accuracy')
+    plt.ylabel(metric)
 
     plt.tight_layout()
 
@@ -61,16 +71,64 @@ def plot_results(df):
     if not os.path.exists(PLOTS_DIR):
         os.makedirs(PLOTS_DIR)
 
-    plot_filename = f"targetflip_accuracy_{attack_type}.png"
+    plot_filename = f"targetflip_{metric}_{attack_type}.png"
     plt.savefig(os.path.join(PLOTS_DIR, plot_filename))
-    plt.show()
+    #plt.show()
+
+    return plot_filename  # Return the filename for reference
+
+def plot_results_MaxRound(df, metrics):
+    if df.empty:
+        print("No valid data to plot.")
+        return
+    # Assuming all rows have the same attack type
+    attack_type = df['Attack Type'].iloc[0]
+    MaxRound=0
+    rounds = list(df['Round'].values)
+    MaxRound = max(rounds)
+    MinRound = min(rounds)
+    print('min, max:', MinRound, MaxRound)
+
+    df = df[df['Round'] == MaxRound]
+    df = df[metrics + ['Malicious Clients']]
+    sns.set_style("whitegrid")
+    sns.set_palette("deep")
+
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x='Malicious Clients', y='value', hue='variable',
+                 data=pd.melt(df, ['Malicious Clients']))
+
+    title = f'TargetFlip Metrics Evolution per Round (Attack: {attack_type})'
+
+    plt.title(title)
+    plt.xlabel('Malicious Clients')
+    plt.ylabel('metric value')
+
+    plt.tight_layout()
+
+    # Save the plot
+    if not os.path.exists(PLOTS_DIR):
+        os.makedirs(PLOTS_DIR)
+
+    plot_filename = f"Maxroundtargetflip_metrics_{attack_type}.png"
+    plt.savefig(os.path.join(PLOTS_DIR, plot_filename))
+    #plt.show()
 
     return plot_filename  # Return the filename for reference
 
 
 def run_plotter():
     df = load_results()
-    plot_filename = plot_results(df)
+    metrics = ['accuracy', 'adversarial_accuracy','target_precision','target_recall','new_precision',
+               'new_recall', 'adversarial_precision_wgt', 'adversarial_recall_wgt',
+               'adversarial_precision_wgnl', 'adversarial_recall_wgnl']
+
+    plot_filename = plot_results_MaxRound(df, metrics)
     print(f"Plot saved as: {os.path.join(PLOTS_DIR, plot_filename)}")
 
-run_plotter()
+    for metric in metrics:
+        plot_filename = plot_results(df, metric)
+        print(f"Plot saved as: {os.path.join(PLOTS_DIR, plot_filename)}")
+
+if __name__ == "__main__":
+    run_plotter()

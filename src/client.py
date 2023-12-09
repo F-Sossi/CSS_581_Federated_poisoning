@@ -221,14 +221,15 @@ class FlowerClient(fl.client.NumPyClient):
         new_recall = 0
         adversarial_precision = 0
         adversarial_recall = 0
+        adversarial_precision2 = 0
+        adversarial_recall2 = 0
         attack_type = os.environ.get("ATTACK")
         if 'targeted' in attack_type:
             split = attack_type.split('T')
             target_class = int(split[1])
             new_label = int(split[2])
-            num_targ_class = 0
-            num_new_label = 0
-            success = 0
+
+            # non-adversarial
             target_predictions_TP = 0
             target_predictions_FP = 0
             target_predictions_TN = 0
@@ -237,64 +238,91 @@ class FlowerClient(fl.client.NumPyClient):
             new_label_predictions_FP = 0
             new_label_predictions_TN = 0
             new_label_predictions_FN = 0
+
+            #With regards to target class
             adversarial_predictions_TP = 0
             adversarial_predictions_FP = 0
             adversarial_predictions_TN = 0
             adversarial_predictions_FN = 0
 
-            """
-            Accuracy, True positives, and False negatives
-            """
-            for yp, yt in zip(y_pred, y_true):
-                if yt == target_class:
-                    num_targ_class += 1
-                    if yp == new_label:
-                        #for overall accuracy
-                        success += 1
-                        adversarial_predictions_TP += 1
-                    elif yp == target_class:
-                        target_predictions_TP += 1
-                    else:
-                        target_predictions_FN += 1
-                        adversarial_predictions_FN += 1
+            #With regards to new label
+            adversarial_predictions_TP2 = 0
+            adversarial_predictions_FP2 = 0
+            adversarial_predictions_TN2 = 0
+            adversarial_predictions_FN2 = 0
 
-                elif yt == new_label:
-                    num_new_label += 1
+            #general
+            normal_score = 0
+            adversarial_score = 0
+            total = 0
+
+
+            for yp, yt in zip(y_pred, y_true):
+                """
+                Normal Cases
+                """
+                # new label
+                if yt == new_label:
                     if yp == new_label:
                         new_label_predictions_TP += 1
                     else:
                         new_label_predictions_FN += 1
+                else:
+                    if yp == new_label:
+                        new_label_predictions_FP += 1
+                    else:
+                        new_label_predictions_TN += 1
 
+                # target_class
+                if yt == target_class:
+                    if yp == target_class:
+                        target_predictions_TP += 1
+                    else:
+                        target_predictions_FN += 1
+                else:
+                    if yp == target_class:
+                        target_predictions_FP += 1
+                    else:
+                        target_predictions_TN += 1
+
+                #general
+                if yt == yp:
+                    normal_score += 1
                 """
-                False Positives and True Negatives
+                Adversarial Case
                 """
-                # "new label" class non-adversarial
-                #False Positive
-                if yp == new_label and yt != new_label:
-                    new_label_predictions_FP += 1
-                #True Negative
-                if yp != new_label and yt != new_label:
-                    new_label_predictions_TN += 1
+                if yt == target_class:
+                    if yp == new_label:
+                        adversarial_predictions_TP += 1
+                    else:
+                        adversarial_predictions_FN += 1
+                else:
+                    if yp == new_label:
+                        adversarial_predictions_FP += 1
+                    else:
+                        adversarial_predictions_TN += 1
 
-                # "target" class non-adversarial
-                #False Positive
-                if yp == target_class and yt != target_class:
-                    target_predictions_FP += 1
-                #True Negative
-                if yp != target_class and yt != target_class:
-                    target_predictions_TN += 1
+                # with regards to the new_label class
+                if yt == new_label:
+                    if yp == new_label:
+                        adversarial_predictions_TP2 += 1
+                    else:
+                        adversarial_predictions_FN2 += 1
+                else:
+                    if yp == new_label and yt != target_class:
+                        adversarial_predictions_FP2 += 1
+                    else:
+                        adversarial_predictions_TN2 += 1
 
-                # Adversarial Task, (predict target class as new label)
-                #False Positive
-                if yp == new_label and yt != target_class:
-                    adversarial_predictions_FP += 1
-                #True Negative
-                if yp != new_label and yt != target_class:
-                    adversarial_predictions_TN += 1
+                # overall accuracy
+                if yt != target_class and yp == yt:
+                    adversarial_score += 1
+                if yt == target_class and yp == new_label:
+                    adversarial_score += 1
 
-            #Accuracy (adversarial)
-            adversarial_accuracy = success / num_targ_class
-
+                #always
+                total += 1
+            #Calculating the metrics: precision, recall
             # non-adversarial task:
             target_precision = 0
             if (target_predictions_TP + target_predictions_FP) > 0:
@@ -311,6 +339,7 @@ class FlowerClient(fl.client.NumPyClient):
             new_recall = 0
             if (new_label_predictions_TP + new_label_predictions_FN) > 0:
                 new_recall = new_label_predictions_TP / (new_label_predictions_TP + new_label_predictions_FN)
+            accuracy = normal_score / total
 
             #adversarial task
             adversarial_precision = 0
@@ -321,6 +350,16 @@ class FlowerClient(fl.client.NumPyClient):
             if (adversarial_predictions_TP + adversarial_predictions_FN) > 0:
                 adversarial_recall= adversarial_predictions_TP / (adversarial_predictions_TP + adversarial_predictions_FN)
 
+            adversarial_precision2 = 0
+            if (adversarial_predictions_TP2 + adversarial_predictions_FP2) > 0:
+                adversarial_precision2 = adversarial_predictions_TP2 / (adversarial_predictions_TP2 + adversarial_predictions_FP2)
+
+            adversarial_recall2 = 0
+            if (adversarial_predictions_TP2 + adversarial_predictions_FN2) > 0:
+                adversarial_recall2 = adversarial_predictions_TP2 / (
+                            adversarial_predictions_TP2 + adversarial_predictions_FN2)
+
+            adversarial_accuracy = adversarial_score / total
         metrics_dictionary = {}
         metrics_dictionary['accuracy'] = accuracy
         metrics_dictionary['adversarial_accuracy'] = adversarial_accuracy
@@ -328,8 +367,10 @@ class FlowerClient(fl.client.NumPyClient):
         metrics_dictionary['target_recall'] = target_recall
         metrics_dictionary['new_precision'] = new_precision
         metrics_dictionary['new_recall'] = new_recall
-        metrics_dictionary['adversarial_precision'] = adversarial_precision
-        metrics_dictionary['adversarial_recall'] = adversarial_recall
+        metrics_dictionary['adversarial_precision_wgt'] = adversarial_precision
+        metrics_dictionary['adversarial_recall_wgt'] = adversarial_recall
+        metrics_dictionary['adversarial_precision_wgnl'] = adversarial_precision2
+        metrics_dictionary['adversarial_recall_wgnl'] = adversarial_recall2
         return float(loss), len(testloader.dataset), metrics_dictionary
 
 

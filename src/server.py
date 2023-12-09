@@ -43,12 +43,73 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         self.metrics_log.append(aggregated_metrics)
 
         aggregated_loss2, aggregated_metrics2 = super().aggregate_evaluate(server_round, results, failures)
+
         # Add custom logic to aggregate metrics such as accuracy
+        # Extended Metrics
         if results:
+
+            #Adversrial Accuracy
             weighted_sum = sum(
-                res.metrics["target_accuracy"] * res.num_examples for _, res in results if "target_accuracy" in res.metrics)
+                res.metrics["adversarial_accuracy"] * res.num_examples for _, res in results if "adversarial_accuracy" in res.metrics)
             total_examples = sum(res.num_examples for _, res in results)
-            aggregated_metrics2["target_accuracy"] = weighted_sum / total_examples if total_examples > 0 else 0
+            aggregated_metrics2["adversarial_accuracy"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            #target Precision
+            weighted_sum = sum(
+                res.metrics["target_precision"] * res.num_examples for _, res in results if
+                "target_precision" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["target_precision"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # target Recall
+            weighted_sum = sum(
+                res.metrics["target_recall"] * res.num_examples for _, res in results if
+                "target_recall" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["target_recall"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # new Precision
+            weighted_sum = sum(
+                res.metrics["new_precision"] * res.num_examples for _, res in results if
+                "new_precision" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["new_precision"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # new Recall
+            weighted_sum = sum(
+                res.metrics["new_recall"] * res.num_examples for _, res in results if
+                "new_recall" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["new_recall"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # adversarial precision with regards to target
+            weighted_sum = sum(
+                res.metrics["adversarial_precision_wgt"] * res.num_examples for _, res in results if
+                "adversarial_precision_wgt" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["adversarial_precision_wgt"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # adversarial Recall with regards to target
+            weighted_sum = sum(
+                res.metrics["adversarial_recall_wgt"] * res.num_examples for _, res in results if
+                "adversarial_recall_wgt" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["adversarial_recall_wgt"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # adversarial precision with regards to new label
+            weighted_sum = sum(
+                res.metrics["adversarial_precision_wgnl"] * res.num_examples for _, res in results if
+                "adversarial_precision_wgnl" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["adversarial_precision_wgnl"] = weighted_sum / total_examples if total_examples > 0 else 0
+
+            # adversarial Recall with regards to new label
+            weighted_sum = sum(
+                res.metrics["adversarial_recall_wgnl"] * res.num_examples for _, res in results if
+                "adversarial_recall_wgnl" in res.metrics)
+            total_examples = sum(res.num_examples for _, res in results)
+            aggregated_metrics2["adversarial_recall_wgnl"] = weighted_sum / total_examples if total_examples > 0 else 0
+
 
         self.extended_metrics_log.append(aggregated_metrics2)
 
