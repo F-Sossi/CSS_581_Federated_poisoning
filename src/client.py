@@ -18,7 +18,22 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Net(nn.Module):
-    """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+    """
+    A simple convolutional neural network model adapted from the 'PyTorch: A 60 Minute Blitz' tutorial.
+
+    Inherits from nn.Module.
+
+    Attributes:
+        conv1 (nn.Conv2d): First convolutional layer.
+        pool (nn.MaxPool2d): Max pooling layer.
+        conv2 (nn.Conv2d): Second convolutional layer.
+        fc1 (nn.Linear): First fully connected layer.
+        fc2 (nn.Linear): Second fully connected layer.
+        fc3 (nn.Linear): Third fully connected layer, producing the final output.
+
+    Methods:
+        forward(x): Defines the forward pass of the model.
+    """
 
     def __init__(self) -> None:
         super(Net, self).__init__()
@@ -39,11 +54,30 @@ class Net(nn.Module):
 
 
 def random_label_flip(labels):
+    """
+    Randomly flips the labels of a given tensor to new random values.
+
+    Parameters:
+        labels (torch.Tensor): The original labels tensor.
+
+    Returns:
+        torch.Tensor: Tensor with randomly flipped labels.
+    """
     labels = torch.randint(0, 10, labels.shape)
     return labels
 
 
 def constant_label_flip(labels, offset):
+    """
+    Flips the labels of a tensor by a constant offset.
+
+    Parameters:
+        labels (torch.Tensor): The original labels tensor.
+        offset (int): The offset to apply to each label.
+
+    Returns:
+        torch.Tensor: Tensor with labels flipped by the specified offset.
+    """
     unique_values = torch.unique(labels)
     # print(unique_values)
     num_unique = list(unique_values.size())[0]
@@ -58,12 +92,36 @@ def constant_label_flip(labels, offset):
 
 
 def targeted_label_flip(labels, original, target):
+    """
+    Flips specific labels from an original value to a target value.
+
+    Parameters:
+        labels (torch.Tensor): The original labels tensor.
+        original (int): The original label value to be flipped.
+        target (int): The target label value to flip to.
+
+    Returns:
+        torch.Tensor: Tensor with specific labels flipped from original to target.
+    """
     labels[labels == original] = target
     return labels
 
 
 def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack_type='none'):
-    """Train the model on the training set."""
+    """
+    Trains the neural network model on a dataset.
+
+    Parameters:
+        net (Net): The neural network model to train.
+        trainloader (DataLoader): DataLoader for the training dataset.
+        poisoned_dataset (DataLoader): DataLoader for the poisoned dataset (if any).
+        epochs (int): Number of epochs to train the model.
+        is_malicious (bool, optional): Indicates if the training should include a malicious attack. Defaults to False.
+        attack_type (str, optional): Type of attack to simulate if is_malicious is True. Defaults to 'none'.
+
+    Returns:
+        None
+    """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
@@ -111,7 +169,16 @@ def train(net, trainloader, poisoned_dataset, epochs, is_malicious=False, attack
 
 
 def test(net, testloader):
-    """Validate the model on the test set."""
+    """
+    Tests the neural network model on a test dataset.
+
+    Parameters:
+        net (Net): The neural network model to test.
+        testloader (DataLoader): DataLoader for the test dataset.
+
+    Returns:
+        Tuple: A tuple containing the total loss, accuracy, predictions, and true labels of the test dataset.
+    """
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     y_true = []
@@ -143,6 +210,13 @@ import os
 
 
 def load_data():
+    """
+    Loads the CIFAR-10 dataset and a poisoned dataset if available.
+
+    Returns:
+        Tuple[DataLoader, DataLoader, DataLoader]: A tuple containing DataLoaders for the training dataset,
+        test dataset, and the poisoned dataset (if available).
+    """
     poisoned_data_loader = None
     poisoned_data_path = '../fakeData/poisoned_data.pt'
 
@@ -193,6 +267,16 @@ def set_parameters(parameters):
 
 
 class FlowerClient(fl.client.NumPyClient):
+    """
+    A Flower client for federated learning, implementing the necessary methods for federated training and evaluation.
+
+    Inherits from fl.client.NumPyClient.
+
+    Methods:
+        get_parameters(config): Returns the model parameters.
+        fit(parameters, config): Trains the model.
+        evaluate(parameters, config): Evaluates the model.
+    """
 
     def __init__(self) -> None:
         self.round_number = 0

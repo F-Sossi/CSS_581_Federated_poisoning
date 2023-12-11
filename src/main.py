@@ -1,3 +1,4 @@
+import flwr as fl
 import subprocess
 import threading
 import os
@@ -7,11 +8,11 @@ from plotter import run_plotter
 
 print('Running Orchestrator (testJGN)')
 # Parameters
+# Changing the Params for testing
+NUM_TOTAL_CLIENTS = 5
+MAX_MALICIOUS_CLIENTS = 2
 
-NUM_TOTAL_CLIENTS = 20
-MAX_MALICIOUS_CLIENTS = 10
-
-NUM_ROUNDS = 30
+NUM_ROUNDS = 3
 RESULTS_DIR = "../experiment_results"
 
 # An experiment ID
@@ -30,12 +31,34 @@ gan_attack # Use GAN fake data
 
 # Function to start the Flower server
 def start_server(num_rounds, output_file, attack):
+    """
+    Starts the Flower federated learning server.
+
+    Parameters:
+    num_rounds (int): The number of training rounds to run.
+    output_file (str): Path to the file where the server output will be saved.
+    attack (str): The type of attack to simulate on the federated learning process.
+
+    This function constructs the command to start the server and runs it using subprocess.
+    """
     cmd = ["python", "server.py", "--rounds", str(num_rounds), "--output", output_file, '--attack', attack]
     subprocess.run(cmd)
 
 
 # Function to start a Flower client
 def start_client(is_malicious=False, attack='none', client_id=0, num_mal=0, exp_id='undefined'):
+    """
+    Starts a Flower federated learning client.
+
+    Parameters:
+    is_malicious (bool): Flag to indicate if the client is malicious.
+    attack (str): The type of attack the client will use if it is malicious.
+    client_id (int): The identifier for the client.
+    num_mal (int): The number of malicious clients.
+    exp_id (str): The experiment identifier.
+
+    This function sets up the environment variables and starts the client process.
+    """
     env = os.environ.copy()
     # print("Starting client. Malicious:", is_malicious)
     env["IS_MALICIOUS"] = "1" if is_malicious else "0"
@@ -49,6 +72,16 @@ def start_client(is_malicious=False, attack='none', client_id=0, num_mal=0, exp_
 
 
 def select_attack_type():
+    """
+    Presents a menu for selecting the type of attack to perform in the federated learning experiment.
+
+    This function displays a list of possible attack types and prompts the user to select one.
+    It also handles special cases for certain attacks, like setting up additional parameters
+    or preconditions (like training a GAN for the GAN attack).
+
+    Returns:
+    str: The chosen attack type with any necessary parameters included.
+    """
     attack_types = {
         1: 'random_flip',
         2: 'constantFlip_X',  # Handle the X input separately

@@ -46,6 +46,19 @@ device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else 
 
 # Custom weights initialization called on netG and netD
 def weights_init(m):
+    """
+    Custom weight initialization for convolutional and batch normalization layers.
+
+    The weights of convolutional layers are initialized from a normal distribution with mean 0 and standard deviation 0.02.
+    The weights of batch normalization layers are initialized from a normal distribution with mean 1 and standard deviation 0.02,
+    and biases are set to 0.
+
+    Parameters:
+        m (torch.nn.Module): A module of the neural network.
+
+    Returns:
+        None
+    """
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         nn.init.normal_(m.weight.data, 0.0, 0.02)
@@ -55,7 +68,22 @@ def weights_init(m):
 
 
 class Generator(nn.Module):
+    """
+    Generator module for a GAN, responsible for generating fake images.
+
+    This module creates a series of transposed convolutional layers that progressively
+    upscale an input latent vector into a full-sized image.
+
+    Parameters:
+        ngpu (int): Number of GPUs to be used for training.
+
+    Methods:
+        forward(input): Defines the forward pass of the generator.
+    """
     def __init__(self, ngpu):
+        """
+        Initializes the Generator model with the given number of GPUs.
+        """
         super(Generator, self).__init__()
         self.ngpu = ngpu
         self.main = nn.Sequential(
@@ -97,7 +125,22 @@ print(netG)
 
 
 class Discriminator(nn.Module):
+    """
+    Discriminator module for a GAN, responsible for classifying images as real or fake.
+
+    This module consists of a series of convolutional layers that downscale the input image
+    into a single scalar output representing the probability of the input being a real image.
+
+    Parameters:
+        ngpu (int): Number of GPUs to be used for training.
+
+    Methods:
+        forward(input): Defines the forward pass of the discriminator.
+    """
     def __init__(self, ngpu):
+        """
+        Initializes the Discriminator model with the given number of GPUs.
+        """
         super(Discriminator, self).__init__()
         self.ngpu = ngpu
         self.main = nn.Sequential(
@@ -130,6 +173,13 @@ class Discriminator(nn.Module):
         return output.view(-1, 1).squeeze(1)
 
 
+"""
+The main training loop for the GAN. This loop alternately updates the Discriminator and Generator networks.
+It processes data in batches, computes losses for both networks, and updates them using backpropagation.
+
+For each epoch, it prints out the progress and saves intermediate outputs for visualization. At the end of training,
+it saves the final models and poisoned data for later use.
+"""
 # Create the generator
 netG = Generator(ngpu).to(device)
 
