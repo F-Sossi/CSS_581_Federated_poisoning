@@ -7,7 +7,16 @@ import threading
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Accumulate weighted sums and total examples
+    """
+    Computes the weighted average of given metrics.
+
+    Parameters:
+        metrics (List[Tuple[int, Metrics]]): A list of tuples, where each tuple contains
+        the number of examples and the metrics dictionary for a client.
+
+    Returns:
+        Metrics: A dictionary containing the weighted average of the metrics.
+    """
     weighted_sum = sum(num_examples * m["accuracy"] for num_examples, m in metrics if "accuracy" in m)
     total_examples = sum(num_examples for num_examples, _ in metrics)
 
@@ -16,7 +25,24 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class CustomFedAvg(fl.server.strategy.FedAvg):
+    """
+    Custom federated averaging strategy for Flower federated learning server.
+
+    Inherits from fl.server.strategy.FedAvg.
+
+    Attributes:
+        metrics_log (list): Logs aggregated metrics for each round.
+
+    Methods:
+        aggregate_evaluate(server_round, results, failures): Custom aggregation of evaluation
+        results including additional logic for metrics aggregation.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the CustomFedAvg strategy with given arguments.
+
+        Args and kwargs are passed to the superclass FedAvg's __init__ method.
+        """
         super().__init__(*args, **kwargs)
         self.metrics_log = []
 
@@ -58,6 +84,12 @@ strategy = CustomFedAvg(
 
 
 def run_server():
+    """
+    Starts the Flower federated learning server with the defined strategy.
+
+    The server configuration and strategy are defined globally. This function initializes
+    the server and begins the federated learning process.
+    """
     fl.server.start_server(
         server_address="localhost:8081",
         config=fl.server.ServerConfig(num_rounds=args.rounds),

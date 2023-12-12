@@ -9,6 +9,16 @@ PLOTS_DIR = "../plots"
 
 
 def load_results():
+    """
+    Loads experiment results from JSON files in the specified RESULTS_DIR.
+
+    This function reads each JSON file, extracts the relevant information about the attack type,
+    number of malicious clients, and round-wise accuracy, and compiles them into a Pandas DataFrame.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the combined data from all the JSON files.
+        Columns include 'Round', 'Accuracy', 'Malicious Clients', and 'Attack Type'.
+    """
     all_data = []
     for filename in os.listdir(RESULTS_DIR):
         if filename.endswith(".json"):
@@ -37,6 +47,20 @@ def load_results():
 
 
 def plot_results(df):
+    """
+    Generates a line plot from the provided DataFrame.
+
+    The function plots the evolution of model accuracy per round, differentiated by the number
+    of malicious clients. It saves the plot to the PLOTS_DIR directory.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame containing the data to be plotted. It should have
+        columns 'Round', 'Accuracy', 'Malicious Clients', and 'Attack Type'.
+
+    Returns:
+        Optional[str]: The filename of the saved plot if the DataFrame is not empty;
+        otherwise, None.
+    """
     if df.empty:
         print("No valid data to plot.")
         return
@@ -69,8 +93,15 @@ def plot_results(df):
 
 
 def run_plotter():
+    """
+    Main execution block of the script.
+
+    When the script is run directly, it calls `run_plotter` to execute the data loading and plotting process.
+    """
     df = load_results()
     plot_filename = plot_results(df)
     print(f"Plot saved as: {os.path.join(PLOTS_DIR, plot_filename)}")
 
 
+if __name__ == '__main__':
+    run_plotter()
