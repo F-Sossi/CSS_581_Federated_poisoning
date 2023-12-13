@@ -1,3 +1,26 @@
+# Federated Learning Attack and Defense Framework
+
+## Overview
+This repository hosts the code and resources for our extensive research on the impact of data poisoning attacks on Federated Learning (FL) systems. Our study emphasizes the role of Machine Learning in cybersecurity, with a focus on Federated Learning models trained on decentralized datasets. We explore various poisoning attacks in FL and their implications for model reliability and cyber-security effectiveness.
+
+## Key Features
+- **Modular Framework**: A comprehensive and modular setup for simulating a variety of data poisoning attacks in a federated learning environment.
+- **Production-Level Testing**: Utilizes the Flower Framework for federated learning, ensuring experiments are conducted in a realistic and production-capable setting.
+- **Diverse Attack Simulations**: Includes simulations of random label flipping, constant label flipping, targeted label manipulation, and GAN-based data poisoning.
+- **Extensive Experimentation**: Detailed experiments using the CIFAR10 dataset to analyze the effects of different types of attacks on FL models.
+
+## Repository Contents
+- **Federated Learning Setup**: Code for setting up the federated learning environment using the Flower framework.
+- **Attack Simulations**: Scripts and modules for implementing various poisoning attacks.
+- **Model and Data Configuration**: Resources for setting up the Convolutional Neural Network (CNN) and data preprocessing.
+- **GAN Implementation**: Generative Adversarial Network setup and integration with the FL experiments.
+- **Experimental Results**: Visualization and analysis scripts for interpreting the outcomes of the experiments.
+
+## Research Findings
+Our research highlights the significant effects of data poisoning attacks in FL, especially the role of malicious client proportion in attack effectiveness. We demonstrate the varying impacts of different attack types on model performance, emphasizing the need for robust defenses in FL systems.
+
+## Future Directions
+The repository also outlines potential future work, including the exploration of more sophisticated client models, refined GAN strategies, broader attack spectrums, and real-world deployment scenarios.
 
 ### Running the Project
 ```angular2html
